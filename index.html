@@ -1,694 +1,579 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skrin Hub</title>
-    <link rel="icon" href="https://i.ibb.co/Lz2sSKQV/Fotoram-io-19.png">
-    <link rel="stylesheet" href="style.css?v=2">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* ===== GENERATOR TAB SWITCHER ===== */
-        .gen-tab-switcher {
-            display: flex;
-            gap: 4px;
-            background: rgba(255,255,255,.05);
-            border-radius: 10px;
-            padding: 4px;
-            margin-bottom: 20px;
-        }
-        .gen-tab-btn {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 7px;
-            background: transparent;
-            color: rgba(255,255,255,.4);
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .5px;
-            cursor: pointer;
-            transition: all .2s;
-        }
-        .gen-tab-btn.active {
-            background: rgba(255,255,255,.1);
-            color: #fff;
-        }
-        .gen-tab-btn:hover:not(.active) { color: rgba(255,255,255,.7); }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exe Obfuscator Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #0a0506;
+      --panel: #140b0d;
+      --border: #2a1417;
+      --border-focus: #4a1f24;
+      --accent: #ff3344;
+      --accent-dim: #cc2936;
+      --text: #f5f0f1;
+      --text-dim: #8c7a7c;
+    }
 
-        /* ===== DUALHOOK HERO ===== */
-        .dh-hero {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255,255,255,.04);
-            border: 1px solid rgba(255,255,255,.08);
-            border-radius: 10px;
-            padding: 14px 16px;
-            margin-bottom: 20px;
-        }
-        .dh-hero-title { font-size: 15px; font-weight: 700; color: var(--accent); }
-        .dh-hero-sub   { font-size: 11px; color: rgba(255,255,255,.45); margin-top: 2px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        /* ===== REDIRECT CHANCE CARDS ===== */
-        .dh-chance-group {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-        }
-        .dh-chance-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-            padding: 12px 6px;
-            border: 1.5px solid rgba(255,255,255,.1);
-            border-radius: 10px;
-            background: rgba(255,255,255,.04);
-            cursor: pointer;
-            transition: all .18s;
-            color: rgba(255,255,255,.5);
-        }
-        .dh-chance-card:hover { border-color: rgba(255,255,255,.25); color: rgba(255,255,255,.8); }
-        .dh-chance-card.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.8); color: #fff; box-shadow: 0 0 10px rgba(255,255,255,.15); }
-        .dh-chance-ratio { font-size: 14px; font-weight: 700; }
-        .dh-chance-pct   { font-size: 10px; font-weight: 500; opacity: .8; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
 
-        /* ===== MY HOOKS LIST ===== */
-        .dh-hooks-title {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .4px;
-            color: rgba(255,255,255,.35);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-        .dh-hook-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            background: rgba(255,255,255,.04);
-            border: 1px solid rgba(255,255,255,.08);
-            border-radius: 8px;
-            margin-bottom: 6px;
-        }
-        .dh-hook-info  { flex: 1; min-width: 0; }
-        .dh-hook-slug  { display: block; font-size: 13px; font-weight: 600; color: var(--accent); }
-        .dh-hook-meta  { display: block; font-size: 11px; color: rgba(255,255,255,.4); margin-top: 2px; }
-        .dh-hook-actions { display: flex; gap: 6px; flex-shrink: 0; }
-        .dh-hook-actions a.admin-btn { text-decoration: none; }
+    /* Contenedor Arrastrable */
+    .window {
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 540px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+      z-index: 10;
+    }
 
-        @media (max-width: 500px) {
-            .dh-chance-group { grid-template-columns: repeat(2, 1fr); }
-        }
-    </style>
+    .header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      cursor: move;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+      color: var(--text);
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .version {
+      font-size: 11px;
+      color: var(--text-dim);
+      background: var(--border);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .content-body {
+      padding: 20px;
+    }
+
+    /* Sistema de Pestañas */
+    .tabs {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-dim);
+    }
+
+    .tab-title {
+      font-size: 13px;
+      font-weight: 500;
+      display: block;
+    }
+
+    .tab-sub {
+      font-size: 9px;
+      opacity: 0.7;
+      display: block;
+    }
+
+    .tab.active {
+      background: var(--panel);
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* Inputs y Controles */
+    .field-group {
+      margin-bottom: 16px;
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .label-main {
+      font-size: 12px;
+      color: var(--text);
+      display: block;
+    }
+
+    .label-sub {
+      font-size: 9px;
+      color: var(--text-dim);
+      display: block;
+    }
+
+    .file-label {
+      text-align: right;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .file-main {
+      font-size: 12px;
+      color: var(--accent);
+      display: block;
+    }
+
+    .file-sub {
+      font-size: 9px;
+      color: var(--text-dim);
+      display: block;
+    }
+
+    .file-label:hover .file-main {
+      color: #ff5566;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    textarea, .output-box {
+      width: 100%;
+      height: 160px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      outline: none;
+      resize: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      border-color: var(--border-focus);
+    }
+
+    .output-box {
+      height: 160px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Diseño alineado (Ofuscar y Limpiar lado a lado) */
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .action-group {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+      color: var(--text);
+    }
+
+    button:hover {
+      background: var(--border);
+      border-color: var(--border-focus);
+    }
+
+    .btn-main {
+      font-size: 13px;
+      font-weight: 500;
+      display: block;
+    }
+
+    .btn-sub {
+      font-size: 9px;
+      color: var(--text-dim);
+      display: block;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+    }
+
+    button.primary .btn-sub {
+      color: #330005;
+    }
+
+    button.primary:hover {
+      background: #ff5566;
+    }
+
+    /* Alerta Lua Superior */
+    .lua-warning {
+      padding: 12px;
+      text-align: center;
+      border: 1px dashed var(--accent-dim);
+      border-radius: 8px;
+      background: rgba(255, 51, 68, 0.04);
+      margin-bottom: 16px;
+    }
+
+    .warn-main {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .warn-sub {
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    .preview-container {
+      margin-top: 16px;
+      display: none;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #000;
+    }
+  </style>
 </head>
 <body>
-<canvas id="particles"></canvas>
 
-<!-- HEADER -->
-<header>
-    <div class="header-left">
-        <img src="https://i.ibb.co/Lz2sSKQV/Fotoram-io-19.png" alt="Logo" class="logo-img">
-        <span class="logo-text">stealer<strong>hub</strong></span>
+  <div class="window" id="dragWindow">
+    <div class="header" id="dragHeader">
+      <div class="logo">GARAMA <span>OBFUSCATOR PRO</span></div>
+      <div class="version">Engine v4</div>
     </div>
-    <nav>
-        <button class="tab active" data-page="generator">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            Generator
-        </button>
-        <button class="tab" data-page="tutorial">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Tutorial
-        </button>
-        <button class="tab" data-page="chat">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Chat
-        </button>
-        <button class="tab" data-page="logs">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            Global Logs
-        </button>
-        <button class="tab" data-page="mylogs">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            My Logs
-        </button>
-        <button class="tab" data-page="top">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 22V8a4 4 0 0 0-4-4H4v9a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4V4h-2a4 4 0 0 0-4 4v14"/></svg>
-            Top
-        </button>
-        <button class="tab" data-page="ranks">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            Ranks
-        </button>
-        <button class="tab" data-page="credits">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Credits
-        </button>
-        <button class="tab admin-tab" data-page="admin" style="display:none;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
-            Admin
-        </button>
-    </nav>
-    <div class="header-right">
-        <div class="counter-pill">
-            <span class="counter-dot"></span>
-            <span id="genCount">0</span> generated
+
+    <div class="content-body">
+      <div class="tabs">
+        <div class="tab active" data-lang="js">
+          <span class="tab-title">JavaScript</span>
+          <span class="tab-sub">JavaScript</span>
         </div>
-        <button class="login-btn" id="loginBtn">
-            <svg class="discord-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-            <img class="login-avatar hidden" id="loginAvatar" src="" alt="">
-            <span class="login-label" id="loginLabel">Sign in</span>
-        </button>
-    </div>
-</header>
-
-<!-- ===== GENERATOR PAGE ===== -->
-<main class="page active" id="page-generator">
-    <div class="hero-badge">
-        <span class="live-dot"></span> LIVE &middot; Script Generator
-    </div>
-    <h1 class="hero-title">stealer<span>hub</span></h1>
-    <p class="hero-sub">Generate auto-trade scripts for Steal a Brainrot</p>
-
-    <div class="card generator-card">
-        <!-- GEN / DUAL HOOK TAB SWITCHER (only shown when logged in) -->
-        <div class="gen-tab-switcher" id="genTabSwitcher" style="display:none;">
-            <button class="gen-tab-btn active" data-gentab="generator">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                GENERATOR
-            </button>
-            <button class="gen-tab-btn" data-gentab="dualhook" style="display:none;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                DUAL HOOK
-            </button>
+        <div class="tab" data-lang="py">
+          <span class="tab-title">Python</span>
+          <span class="tab-sub">Python</span>
         </div>
+        <div class="tab" data-lang="lua">
+          <span class="tab-title">Lua</span>
+          <span class="tab-sub">Lua</span>
+        </div>
+      </div>
 
-        <!-- GENERATOR PANE -->
-        <div id="genPaneGenerator">
-        <div class="field">
-            <label>ROBLOX USERNAME</label>
-            <div id="userSlots">
-                <div class="user-slot" data-index="0">
-                    <div class="user-input-wrap">
-                        <input type="text" class="user-input" placeholder="Type to search..." autocomplete="off">
-                        <button class="slot-remove">&times;</button>
-                    </div>
-                    <div class="user-dropdown"></div>
-                    <div class="user-selected hidden">
-                        <img class="user-avatar" src="" alt="">
-                        <div class="user-info">
-                            <span class="user-display"></span>
-                            <span class="user-name"></span>
-                        </div>
-                        <button class="user-remove">&times;</button>
-                    </div>
-                </div>
+      <div class="panel active" id="jsPanel">
+        <div class="field-group">
+          <div class="label-row">
+            <div class="label">
+              <span class="label-main">JavaScript Code</span>
+              <span class="label-sub">Código JavaScript</span>
             </div>
-            <button class="add-user" id="addUserBtn">+ Add More</button>
-        </div>
-
-        <!-- WEBHOOK -->
-        <div class="field">
-            <label>DISCORD WEBHOOK <span class="dim">(optional)</span></label>
-            <input type="text" id="webhookInput" placeholder="https://discord.com/api/webhooks/...">
-        </div>
-
-        <!-- MIN GEN + MAX QTY -->
-        <div class="field-row">
-            <div class="field">
-                <label>MINIMUM GENERATION <span class="dim">(M/s)</span></label>
-                <input type="number" id="minGenInput" placeholder="(I'd Recommend 25)" min="0">
-            </div>
-            <div class="field">
-                <label>MAX QUANTITY <span class="dim">(To put inside the trade)</span></label>
-                <input type="number" id="maxQtyInput" placeholder="(7 Is Recommended)" min="1" max="27">
-            </div>
-        </div>
-
-        <!-- TARGET BRAINROTS -->
-        <div class="field">
-            <label>TARGET BRAINROTS <span class="dim">(click to select)</span></label>
-            <div class="toggle-row">
-                <button class="brainrot-card" id="targetOG" data-category="og">
-                    <span class="brainrot-label">OG <span class="toggle-count" id="ogCount">(4)</span></span>
-                    <span class="brainrot-sel" id="ogSel">All selected</span>
-                    <span class="brainrot-view" data-category="og">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                    </span>
-                </button>
-                <button class="brainrot-card" id="targetSecret" data-category="secret">
-                    <span class="brainrot-label">SECRET <span class="toggle-count" id="secretCount">(...)</span></span>
-                    <span class="brainrot-sel" id="secretSel">All selected</span>
-                    <span class="brainrot-view" data-category="secret">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                    </span>
-                </button>
-            </div>
-        </div>
-
-        <!-- MODE -->
-        <div class="field">
-            <label>SCRIPT MODE</label>
-            <div class="mode-group">
-                <button class="mode active" data-mode="noui">No UI</button>
-                <button class="mode" data-mode="freeze">Trade Freeze</button>
-                <button class="mode" data-mode="custom">Your Script</button>
-            </div>
-            <p class="mode-desc" id="modeDesc">Runs without any GUI overlay</p>
-            <textarea id="customScriptInput" class="custom-script-input hidden" rows="4" placeholder="Paste your script or URL here..."></textarea>
-        </div>
-
-        <!-- TOGGLES -->
-        <div class="toggle-row">
-            <label class="toggle-card">
-                <span>OBFUSCATION</span>
-                <div class="switch"><input type="checkbox" id="obfToggle" checked><span class="track"></span></div>
+            <label class="file-label">
+              <span class="file-main">Load file...</span>
+              <span class="file-sub">Cargar archivo...</span>
+              <input type="file" class="file-input" accept=".js" onchange="loadFile(this, 'jsInput')">
             </label>
-            <div class="toggle-card" onclick="document.getElementById('pasteToggle').click()">
-                <div style="display:flex;flex-direction:column;gap:5px;" onclick="event.stopPropagation()">
-                    <span>PASTES WRAP</span>
-                    <select id="pasteProvider" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:var(--accent2);font-size:10px;font-weight:600;padding:3px 6px;outline:none;cursor:pointer;letter-spacing:.3px;">
-                        <option value="paste.rs">paste.rs</option>
-                        <option value="self">api.luarmor.net</option>
-                        <option value="self2">api.luarmor.com</option>
-                    </select>
-                    <div id="pasteNameWrap" style="display:none;margin-top:4px;">
-                        <input type="text" id="pasteNameInput" maxlength="64" placeholder="Custom paste name (optional)" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:var(--accent2);font-size:10px;font-weight:600;padding:3px 6px;outline:none;width:100%;box-sizing:border-box;letter-spacing:.3px;">
-                    </div>
-                </div>
-                <label for="pasteToggle" onclick="event.stopPropagation()" style="cursor:pointer;">
-                    <div class="switch"><input type="checkbox" id="pasteToggle" checked><span class="track"></span></div>
-                </label>
-            </div>
+          </div>
+          <textarea id="jsInput" placeholder="Paste your JavaScript code here... / Pega tu código aquí..."></textarea>
         </div>
-        <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.5px;margin-bottom:4px;text-transform:uppercase;">Optional</div>
-        <div class="toggle-row">
-            <label class="toggle-card" title="Compact plain-text logs instead of embeds">
-                <span>MINIMAL LOGS</span>
-                <div class="switch"><input type="checkbox" id="minWebhookToggle"><span class="track"></span></div>
+        <div class="action-group">
+          <button class="primary" onclick="obfJS()">
+            <span class="btn-main">Obfuscate Code</span>
+            <span class="btn-sub">Ofuscar Código</span>
+          </button>
+          <button onclick="clearInput('jsInput')">
+            <span class="btn-main">Clear</span>
+            <span class="btn-sub">Limpiar</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel" id="pyPanel">
+        <div class="field-group">
+          <div class="label-row">
+            <div class="label">
+              <span class="label-main">Python Code</span>
+              <span class="label-sub">Código Python</span>
+            </div>
+            <label class="file-label">
+              <span class="file-main">Load file...</span>
+              <span class="file-sub">Cargar archivo...</span>
+              <input type="file" class="file-input" accept=".py" onchange="loadFile(this, 'pyInput')">
             </label>
-            <label class="toggle-card" title="Show the YOU GOT DRAINED screen to the victim">
-                <span>DRAINED SCREEN</span>
-                <div class="switch"><input type="checkbox" id="drainedScreenToggle" checked><span class="track"></span></div>
+          </div>
+          <textarea id="pyInput" placeholder="Paste your Python code here... / Pega tu código aquí..."></textarea>
+        </div>
+        <div class="action-group">
+          <button class="primary" onclick="obfPY()">
+            <span class="btn-main">Obfuscate Code</span>
+            <span class="btn-sub">Ofuscar Código</span>
+          </button>
+          <button onclick="clearInput('pyInput')">
+            <span class="btn-main">Clear</span>
+            <span class="btn-sub">Limpiar</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel" id="luaPanel">
+        <div class="lua-warning">
+          <div class="warn-main">MODULE UNDER UPDATE / CURRENT BUGS</div>
+          <div class="warn-sub">Módulo actualizando / Hay fallos de momento</div>
+        </div>
+        <div class="field-group">
+          <div class="label-row">
+            <div class="label">
+              <span class="label-main">Lua Code</span>
+              <span class="label-sub">Código Lua</span>
+            </div>
+            <label class="file-label">
+              <span class="file-main">Load file...</span>
+              <span class="file-sub">Cargar archivo...</span>
+              <input type="file" class="file-input" accept=".lua" onchange="loadFile(this, 'luaInput')">
             </label>
+          </div>
+          <textarea id="luaInput" placeholder="Paste your Lua code here... / Pega tu código aquí..."></textarea>
         </div>
-
-        <!-- GENERATE -->
-        <button class="gen-btn" id="generateBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            <span id="genBtnLabel">Sign in to Generate</span>
-        </button>
-
-        <!-- OUTPUT -->
-        <div class="output hidden" id="outputArea">
-            <pre id="outputText"></pre>
-            <button class="copy-btn" id="copyBtn">Copy</button>
+        <div class="action-group">
+          <button class="primary" onclick="obfLUA()">
+            <span class="btn-main">Obfuscate Code</span>
+            <span class="btn-sub">Ofuscar Código</span>
+          </button>
+          <button onclick="clearInput('luaInput')">
+            <span class="btn-main">Clear</span>
+            <span class="btn-sub">Limpiar</span>
+          </button>
         </div>
+      </div>
 
-        <!-- FEATURES ROW -->
-        <div class="features">
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg> Anti-leave</span>
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg> Webhook alerts</span>
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg> Multi-target</span>
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg> Auto-obfuscated</span>
-        </div>
-        </div><!-- end genPaneGenerator -->
-
-        <!-- DUAL HOOK PANE -->
-        <div id="genPaneDualhook" style="display:none;">
-            <div class="dh-hero">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <div>
-                    <div class="dh-hero-title">DUAL HOOK</div>
-                    <div class="dh-hero-sub">Create an affiliate page &amp; split logs with partners</div>
-                </div>
+      <div id="outputSection" style="margin-top: 20px; display: none;">
+        <div class="field-group">
+          <div class="label-row">
+            <div class="label">
+              <span class="label-main">Obfuscated Result</span>
+              <span class="label-sub">Resultado Ofuscado</span>
             </div>
-
-            <div class="field">
-                <label>PAGE NAME <span class="dim">(URL: shub-scripts.com/a/<strong id="dhSlugPreview">name</strong>)</span></label>
-                <input type="text" id="dhPageName" maxlength="32" placeholder="mypage" autocomplete="off">
-            </div>
-            <div class="field">
-                <label>ROBLOX USERNAME</label>
-                <div class="user-slot" id="dhUserSlot" data-index="dh">
-                    <div class="user-input-wrap">
-                        <input type="text" id="dhRobloxUsername" class="user-input" placeholder="Type to search..." autocomplete="off">
-                    </div>
-                    <div class="user-dropdown"></div>
-                    <div class="user-selected hidden">
-                        <img class="user-avatar" src="" alt="">
-                        <div class="user-info">
-                            <span class="user-display"></span>
-                            <span class="user-name"></span>
-                        </div>
-                        <button class="user-remove">&times;</button>
-                    </div>
-                </div>
-            </div>
-            <div class="field">
-                <label>DISCORD WEBHOOK <span class="dim">(OPTIONAL)</span></label>
-                <input type="text" id="dhWebhook" placeholder="https://discord.com/api/webhooks/...">
-            </div>
-            <div class="field">
-                <label>REDIRECT CHANCE</label>
-                <div class="dh-chance-group">
-                    <button class="dh-chance-card" data-chance="0.25">
-                        <span class="dh-chance-ratio">1 in 4</span>
-                        <span class="dh-chance-pct">25% chance</span>
-                    </button>
-                    <button class="dh-chance-card" data-chance="0.5">
-                        <span class="dh-chance-ratio">1 in 2</span>
-                        <span class="dh-chance-pct">50% chance</span>
-                    </button>
-                    <button class="dh-chance-card active" data-chance="0.75">
-                        <span class="dh-chance-ratio">3 in 4</span>
-                        <span class="dh-chance-pct">75% chance</span>
-                    </button>
-                    <button class="dh-chance-card" data-chance="1.0">
-                        <span class="dh-chance-ratio">4 in 4</span>
-                        <span class="dh-chance-pct">100% chance</span>
-                    </button>
-                </div>
-                <p class="mode-desc" id="dhChanceDesc" style="margin-top:8px;">Site-selected brainrots redirect to backup 3 out of every 4 trades</p>
-            </div>
-            <div class="field">
-                <label>TARGET BRAINROTS <span class="dim" id="dhBrainrotCount">0/428</span></label>
-                <div class="dh-br-wrap">
-                    <div class="toggle-row" style="flex-wrap:wrap;gap:8px;">
-                        <button class="brainrot-card" id="dhTargetOG" data-dh-cat="og">
-                            <span class="brainrot-label">OG <span class="toggle-count" id="dhOgCount">(4)</span></span>
-                            <span class="brainrot-sel" id="dhOgSel">All selected</span>
-                        </button>
-                        <button class="brainrot-card" id="dhTargetSecret" data-dh-cat="secret">
-                            <span class="brainrot-label">SECRET <span class="toggle-count" id="dhSecretCount">(...)</span></span>
-                            <span class="brainrot-sel" id="dhSecretSel">All selected</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <button class="gen-btn" id="dhGenerateBtn" disabled>
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span id="dhBtnLabel">Generate Dual Hook</span>
-            </button>
-
-            <div id="dhStatus" style="display:none;" class="mode-desc" style="margin-top:8px;"></div>
-
-            <!-- Existing pages -->
-            <div id="dhMyHooks" style="margin-top:20px;"></div>
-        </div><!-- end genPaneDualhook -->
-
-    </div><!-- end generator-card -->
-</main>
-
-<!-- ===== TUTORIAL PAGE ===== -->
-<main class="page" id="page-tutorial">
-    <h2 class="section-title">Tutorial</h2>
-    <p class="section-sub">Watch the video to learn how to use StealerHub</p>
-
-    <div class="card tutorial-card" style="text-align:center;">
-        <div class="tut-video-wrap">
-            <iframe 
-                id="tutorialVideo"
-                src="https://www.youtube-nocookie.com/embed/Lvp5YeKECMA" 
-                title="StealerHub Tutorial" 
-                frameborder="0" 
-                referrerpolicy="strict-origin-when-cross-origin"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen>
-            </iframe>
+          </div>
+          <div class="output-box" id="outCode"></div>
         </div>
-        <div class="tut-tabs">
-            <button class="tut-tab active" data-video="Lvp5YeKECMA">How to set it up</button>
-            <button class="tut-tab" data-video="4XyMWnJg4vo">How to advertise</button>
+        
+        <div class="btn-group">
+          <button onclick="copyOut()">
+            <span class="btn-main">Copy Result</span>
+            <span class="btn-sub">Copiar Resultado</span>
+          </button>
+          <button onclick="downloadOut()">
+            <span class="btn-main">Download</span>
+            <span class="btn-sub">Descargar</span>
+          </button>
+          <button id="runBtn" style="grid-column: span 2; display: none;" onclick="runPreview()">
+            <span class="btn-main">Run Preview</span>
+            <span class="btn-sub">Ejecutar Vista Previa</span>
+          </button>
         </div>
+
+        <div class="preview-container" id="previewWrapper">
+          <div class="label-main" style="margin-bottom: 6px; font-size: 12px;">Execution Console / Consola</div>
+          <div id="previewArea"></div>
+        </div>
+      </div>
+
     </div>
-</main>
+  </div>
 
-<!-- ===== CHAT PAGE ===== -->
-<main class="page" id="page-chat">
-    <h2 class="section-title">Chat <span class="live-dot"></span></h2>
-    <p class="section-sub">Community discussion</p>
-    <div class="card chat-card">
-        <div class="chat-messages" id="chatMessages">
-            <div class="chat-empty">No messages yet — be the first to say something!</div>
-        </div>
-        <div class="chat-input-row" id="chatInputRow">
-            <input type="text" id="chatInput" placeholder="Sign in to chat..." disabled maxlength="200">
-            <button class="chat-send" id="chatSendBtn" disabled>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </button>
-        </div>
-    </div>
-</main>
+  <script>
+    // Configuración del Arrastre de Ventana
+    const win = document.getElementById('dragWindow');
+    const header = document.getElementById('dragHeader');
+    let isDragging = false;
+    let currentX, currentY, initialX, initialY;
+    let xOffset = 0, yOffset = 0;
 
-<!-- ===== GLOBAL HITS PAGE ===== -->
-<main class="page" id="page-logs">
-    <div class="logs-title-row">
-        <h2 class="section-title">Global Logs <span class="live-dot"></span></h2>
-        <p class="section-sub">Recent hits across all users</p>
-        <button class="refresh-btn" id="refreshBtn">&#x21BB;</button>
-    </div>
-    <div class="logs-wrap">
-        <div id="logsList" class="logs-list">
-            <div class="log-empty">No logs yet</div>
-        </div>
-    </div>
-</main>
+    header.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+    header.addEventListener('touchstart', dragStart);
+    document.addEventListener('touchmove', drag);
+    document.addEventListener('touchend', dragEnd);
 
-<!-- ===== MY LOGS PAGE ===== -->
-<main class="page" id="page-mylogs">
-    <h2 class="section-title">My Logs</h2>
-    <p class="section-sub">Your personal trade history</p>
-    <div class="card empty-card">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <p>Sign in to see your logs</p>
-    </div>
-    <div class="card mylogs-card" style="display:none;">
-        <div id="myLogsList" class="mylogs-list"></div>
-    </div>
-</main>
+    function dragStart(e) {
+      let clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+      let clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
+      initialX = clientX - xOffset;
+      initialY = clientY - yOffset;
+      if (e.target === header || header.contains(e.target)) isDragging = true;
+    }
 
-<!-- ===== TOP PAGE ===== -->
-<main class="page" id="page-top">
-    <h2 class="section-title">Top Users <span class="live-dot"></span></h2>
-    <p class="section-sub">Leaderboard — most brainrots gained</p>
-    <div class="card top-card">
-        <!-- Podium for top 3 -->
-        <div class="podium" id="podium">
-            <div class="podium-spot second" id="podium-2">
-                <div class="podium-avatar-wrap">
-                    <img class="podium-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">
-                    <span class="podium-badge">2</span>
-                </div>
-                <span class="podium-name">—</span>
-                <span class="podium-count">0</span>
-            </div>
-            <div class="podium-spot first" id="podium-1">
-                <div class="podium-avatar-wrap">
-                    <img class="podium-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">
-                    <span class="podium-badge crown">1</span>
-                </div>
-                <span class="podium-name">—</span>
-                <span class="podium-count">0</span>
-            </div>
-            <div class="podium-spot third" id="podium-3">
-                <div class="podium-avatar-wrap">
-                    <img class="podium-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">
-                    <span class="podium-badge">3</span>
-                </div>
-                <span class="podium-name">—</span>
-                <span class="podium-count">0</span>
-            </div>
-        </div>
-        <!-- Rest of leaderboard -->
-        <div class="top-list" id="topList">
-            <div class="top-empty">Loading leaderboard...</div>
-        </div>
-    </div>
-</main>
+    function drag(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+      let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+      currentX = clientX - initialX;
+      currentY = clientY - initialY;
+      xOffset = currentX;
+      yOffset = currentY;
+      win.style.transform = `translate(calc(-50% + ${currentX}px), ${currentY}px)`;
+    }
 
-<!-- ===== RANKS PAGE ===== -->
-<main class="page" id="page-ranks">
-    <h2 class="section-title">Ranks</h2>
-    <p class="section-sub">Earn ranks by hitting brainrots</p>
+    function dragEnd() { isDragging = false; }
 
-    <div class="rank-your-card card" id="yourRankCard" style="display:none;">
-        <div class="rank-your-inner">
-            <img class="rank-your-avatar" id="rankAvatar" src="" alt="">
-            <div class="rank-your-info">
-                <span class="rank-your-name" id="rankName">—</span>
-                <span class="rank-your-tier" id="rankTier">—</span>
-            </div>
-            <div class="rank-your-stats">
-                <span class="rank-your-count" id="rankCount">0</span>
-                <span class="rank-your-label">hits</span>
-            </div>
-        </div>
-        <div class="rank-progress-wrap">
-            <div class="rank-progress-bar" id="rankProgressBar" style="width:0%"></div>
-        </div>
-        <span class="rank-progress-label" id="rankProgressLabel"></span>
-    </div>
+    // Control de Pestañas
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.panel');
 
-    <div class="ranks-grid">
-        <div class="rank-tier-card" data-tier="hatchling">
-            <div class="rank-tier-icon">🥚</div>
-            <div class="rank-tier-name">Hatchling</div>
-            <div class="rank-tier-req">0+ hits</div>
-            <div class="rank-tier-desc">Just cracked the shell</div>
-        </div>
-        <div class="rank-tier-card" data-tier="scout">
-            <div class="rank-tier-icon">🔍</div>
-            <div class="rank-tier-name">Scout</div>
-            <div class="rank-tier-req">5+ hits</div>
-            <div class="rank-tier-desc">Exploring the field</div>
-        </div>
-        <div class="rank-tier-card" data-tier="raider">
-            <div class="rank-tier-icon">⚔️</div>
-            <div class="rank-tier-name">Raider</div>
-            <div class="rank-tier-req">20+ hits</div>
-            <div class="rank-tier-desc">Ready for battle</div>
-        </div>
-        <div class="rank-tier-card" data-tier="hunter">
-            <div class="rank-tier-icon">🏹</div>
-            <div class="rank-tier-name">Hunter</div>
-            <div class="rank-tier-req">50+ hits</div>
-            <div class="rank-tier-desc">Tracking the prey</div>
-        </div>
-        <div class="rank-tier-card" data-tier="slayer">
-            <div class="rank-tier-icon">🗡️</div>
-            <div class="rank-tier-name">Slayer</div>
-            <div class="rank-tier-req">100+ hits</div>
-            <div class="rank-tier-desc">Proven in combat</div>
-        </div>
-        <div class="rank-tier-card" data-tier="phantom">
-            <div class="rank-tier-icon">👻</div>
-            <div class="rank-tier-name">Phantom</div>
-            <div class="rank-tier-req">250+ hits</div>
-            <div class="rank-tier-desc">Silent and deadly</div>
-        </div>
-        <div class="rank-tier-card" data-tier="warlord">
-            <div class="rank-tier-icon">🐉</div>
-            <div class="rank-tier-name">Warlord</div>
-            <div class="rank-tier-req">500+ hits</div>
-            <div class="rank-tier-desc">Commands the field</div>
-        </div>
-        <div class="rank-tier-card" data-tier="overlord">
-            <div class="rank-tier-icon">☠️</div>
-            <div class="rank-tier-name">Overlord</div>
-            <div class="rank-tier-req">1000+ hits</div>
-            <div class="rank-tier-desc">Absolute domination</div>
-        </div>
-        <div class="rank-tier-card" data-tier="admin">
-            <div class="rank-tier-icon">👑</div>
-            <div class="rank-tier-name">Admin</div>
-            <div class="rank-tier-req">Invite only</div>
-            <div class="rank-tier-desc">Site administrator</div>
-        </div>
-    </div>
-</main>
-
-<!-- ===== CREDITS PAGE ===== -->
-<main class="page" id="page-credits">
-    <h2 class="section-title">Credits</h2>
-    <p class="section-sub">The team behind StealerHub</p>
-
-    <div class="credits-grid" id="creditsGrid">
-        <div class="credit-card" data-uid="1107340151660748941">
-            <div class="credit-banner"></div>
-            <div class="credit-avatar-wrap">
-                <img class="credit-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">
-                <span class="credit-status"></span>
-            </div>
-            <div class="credit-info">
-                <span class="credit-name">Loading...</span>
-                <span class="credit-tag">@...</span>
-            </div>
-            <span class="credit-role">Developer</span>
-            <span class="credit-badge">DEV</span>
-        </div>
-        <div class="credit-card" data-uid="1215567494555770900">
-            <div class="credit-banner"></div>
-            <div class="credit-avatar-wrap">
-                <img class="credit-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">
-                <span class="credit-status"></span>
-            </div>
-            <div class="credit-info">
-                <span class="credit-name">Loading...</span>
-                <span class="credit-tag">@...</span>
-            </div>
-            <span class="credit-role">Developer</span>
-            <span class="credit-badge">DEV</span>
-        </div>
-    </div>
-
-    <div class="credits-discord">
-        <a href="https://discord.gg/stealerhub" target="_blank" rel="noopener noreferrer" class="credits-discord-btn">
-            <svg class="discord-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-            discord.gg/4qUHeEf3KJ
-        </a>
-    </div>
-</main>
-
-<!-- ===== ADMIN PAGE ===== -->
-<main class="page" id="page-admin">
-    <h2 class="section-title">Admin Panel</h2>
-    <p class="section-sub">Manage users &mdash; mute, ban, and moderate</p>
-
-    <div class="admin-search-wrap">
-        <input type="text" id="adminSearch" class="admin-search" placeholder="Search users...">
-    </div>
-
-    <div class="card admin-card">
-        <div class="admin-user-list" id="adminUserList">
-            <div class="admin-loading">Loading users...</div>
-        </div>
-    </div>
-</main>
-
-<!-- ===== BRAINROT SLIDE PANEL ===== -->
-<div class="slide-overlay" id="slideOverlay"></div>
-<div class="slide-panel" id="slidePanel">
-    <div class="slide-header">
-        <button class="slide-back" id="slideBack">&larr;</button>
-        <span class="slide-title" id="slideTitle">OG</span>
-        <div class="slide-actions">
-            <button class="slide-select-all" id="slideSelectAll">Select All</button>
-        </div>
-    </div>
-    <div class="slide-search-wrap">
-        <input type="text" id="slideSearch" class="slide-search" placeholder="Search brainrots...">
-    </div>
-    <div class="slide-list" id="slideList"></div>
-</div>
-
-<script src="script.min.js?v=4"></script>
-<script>
-document.querySelectorAll('.tut-tab').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.tut-tab').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        document.getElementById('tutorialVideo').src = 'https://www.youtube-nocookie.com/embed/' + btn.dataset.video;
+    tabs.forEach(tab => {
+      tab.onclick = () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`${tab.dataset.lang}Panel`).classList.add('active');
+        document.getElementById('outputSection').style.display = 'none';
+        document.getElementById('previewWrapper').style.display = 'none';
+      }
     });
-});
 
-// Dynamically adjust page padding-top to match actual header height (handles 2-row mobile nav)
-function adjustPagePadding() {
-    var h = document.querySelector('header').offsetHeight;
-    document.querySelectorAll('.page').forEach(function(p) {
-        p.style.paddingTop = (h + 16) + 'px';
-    });
-}
-adjustPagePadding();
-window.addEventListener('resize', adjustPagePadding);
-</script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0777e20cbbacf1e',t:'MTc4MDc0OTcwMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    // Cargar archivos locales
+    function loadFile(input, targetId) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById(targetId).value = e.target.result;
+      };
+      reader.readAsText(file);
+      input.value = '';
+    }
+
+    // Botón de limpieza
+    function clearInput(targetId) {
+      document.getElementById(targetId).value = '';
+      document.getElementById('outputSection').style.display = 'none';
+      document.getElementById('previewWrapper').style.display = 'none';
+    }
+
+    // Codificación Base64
+    function b64(str) { return btoa(unescape(encodeURIComponent(str))); }
+    let currentExt = 'txt';
+
+    function obfJS() {
+      const code = document.getElementById('jsInput').value.trim();
+      if (!code) return;
+      const out = `(()=>{eval(decodeURIComponent(escape(atob('${b64(code)}'))))})();`;
+      showOutput(out, 'js');
+    }
+
+    function obfPY() {
+      const code = document.getElementById('pyInput').value.trim();
+      if (!code) return;
+      const out = `import base64\nexec(base64.b64decode('${b64(code)}').decode())`;
+      showOutput(out, 'py');
+    }
+
+    function obfLUA() {
+      const code = document.getElementById('luaInput').value.trim();
+      if (!code) return;
+      const out = `-- [GARAMA OBFUSCATOR PRO]\n-- MODULE UNDER UPDATE / CURRENT BUGS\n-- Módulo actualizando / Hay fallos de momento\n\nlocal _ = "${b64(code)}"`;
+      showOutput(out, 'lua');
+    }
+
+    function showOutput(resultText, lang) {
+      currentExt = lang;
+      document.getElementById('outCode').innerText = resultText;
+      document.getElementById('outputSection').style.display = 'block';
+      const runBtn = document.getElementById('runBtn');
+      if (lang === 'js') {
+        runBtn.style.display = 'block';
+      } else {
+        runBtn.style.display = 'none';
+        document.getElementById('previewWrapper').style.display = 'none';
+      }
+    }
+
+    function copyOut() {
+      navigator.clipboard.writeText(document.getElementById('outCode').innerText);
+    }
+
+    function downloadOut() {
+      const text = document.getElementById('outCode').innerText;
+      if (!text) return;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `obfuscated_${Date.now()}.${currentExt}`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function runPreview() {
+      const code = document.getElementById('outCode').innerText;
+      const wrapper = document.getElementById('previewWrapper');
+      const area = document.getElementById('previewArea');
+      wrapper.style.display = 'block';
+      area.innerHTML = ''; 
+      const frame = document.createElement('iframe');
+      frame.sandbox = 'allow-scripts';
+      frame.srcdoc = `<!doctype html><html><body><script>${code}<\/script></body></html>`;
+      area.appendChild(frame);
+    }
+  </script>
+</body>
 </html>
