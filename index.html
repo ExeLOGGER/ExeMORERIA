@@ -1,579 +1,754 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Exe Obfuscator Pro</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --bg: #0a0506;
-      --panel: #140b0d;
-      --border: #2a1417;
-      --border-focus: #4a1f24;
-      --accent: #ff3344;
-      --accent-dim: #cc2936;
-      --text: #f5f0f1;
-      --text-dim: #8c7a7c;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webhook Listenify — Discord Sender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121e;
+  --bg-card: rgba(18, 18, 38, 0.65);
+  --bg-input: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.07);
+  --text-primary: #e8e8f0;
+  --text-secondary: #8888a8;
+  --text-muted: #55556a;
+  --accent-purple: #5865F2;
+  --accent-cyan: #00d4ff;
+  --accent-magenta: #e040fb;
+  --accent-green: #57F287;
+  --accent-red: #ED4245;
+  --accent-yellow: #FEE75C;
+  --gradient-main: linear-gradient(135deg, #5865F2, #00d4ff, #e040fb);
+  --gradient-btn: linear-gradient(135deg, #5865F2, #7c3aed);
+  --shadow-lg: 0 16px 64px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 30px rgba(88,101,242,0.2), 0 0 60px rgba(88,101,242,0.1);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font-body);background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(88,101,242,0.3);border-radius:3px}
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
+#particleCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow: hidden;
-      position: relative;
-    }
+.bg-blobs{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+.bg-blobs .blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:0.15;animation:blobFloat 20s ease-in-out infinite}
+.bg-blobs .blob:nth-child(1){width:600px;height:600px;background:var(--accent-purple);top:-10%;left:-10%}
+.bg-blobs .blob:nth-child(2){width:500px;height:500px;background:var(--accent-cyan);top:50%;right:-15%;animation-delay:-7s;animation-duration:25s}
+.bg-blobs .blob:nth-child(3){width:400px;height:400px;background:var(--accent-magenta);bottom:-10%;left:30%;animation-delay:-14s;animation-duration:22s}
+@keyframes blobFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(60px,-40px) scale(1.1)}50%{transform:translate(-30px,60px) scale(0.95)}75%{transform:translate(40px,30px) scale(1.05)}}
 
-    /* Contenedor Arrastrable */
-    .window {
-      position: absolute;
-      top: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 540px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
-      z-index: 10;
-    }
+.page-wrapper{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:40px 20px 60px}
 
-    .header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      cursor: move;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      user-select: none;
-    }
+.header{text-align:center;margin-bottom:40px;opacity:0;animation:fadeSlideUp .8s ease-out forwards}
+.header-icon{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:18px;background:var(--gradient-btn);margin-bottom:20px;font-size:28px;color:#fff;box-shadow:0 0 40px rgba(88,101,242,0.3);animation:iconPulse 3s ease-in-out infinite}
+@keyframes iconPulse{0%,100%{box-shadow:0 0 40px rgba(88,101,242,0.3)}50%{box-shadow:0 0 60px rgba(88,101,242,0.5)}}
+.header h1{font-family:var(--font-display);font-size:clamp(2rem,5vw,3rem);font-weight:800;background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.02em;line-height:1.1;margin-bottom:10px}
+.header p{color:var(--text-secondary);font-size:0.95rem;max-width:460px;margin:0 auto}
 
-    .logo {
-      font-weight: 700;
-      font-size: 16px;
-      letter-spacing: 0.5px;
-      color: var(--text);
-    }
+.glass-card{background:var(--bg-card);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:var(--radius-xl);padding:36px 32px;box-shadow:var(--shadow-lg),var(--shadow-glow);position:relative;overflow:hidden;opacity:0;animation:fadeSlideUp .8s ease-out .15s forwards;transition:box-shadow .4s ease}
+.glass-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)}
+.glass-card:hover{box-shadow:var(--shadow-lg),0 0 50px rgba(88,101,242,0.15)}
 
-    .logo span {
-      color: var(--accent);
-    }
+.form-group{margin-bottom:24px;position:relative;opacity:0;animation:fadeSlideUp .6s ease-out forwards}
+.form-group:nth-child(1){animation-delay:.25s}
+.form-group:nth-child(2){animation-delay:.32s}
+.form-group:nth-child(3){animation-delay:.39s}
+.form-group:nth-child(4){animation-delay:.46s}
 
-    .version {
-      font-size: 11px;
-      color: var(--text-dim);
-      background: var(--border);
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
+.form-label{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.form-label i{font-size:.85rem;color:var(--accent-purple)}
+.form-label .tip{position:relative;cursor:help;color:var(--text-muted);font-size:.75rem}
+.form-label .tip:hover .tip-text,.form-label .tip:focus .tip-text{opacity:1;pointer-events:auto}
+.tip-text{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1e1e30;color:var(--text-primary);font-size:.75rem;font-weight:400;text-transform:none;letter-spacing:0;padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:10;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 
-    .content-body {
-      padding: 20px;
-    }
+/* Format hints */
+.format-hints{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;pointer-events:none}
+.format-hint{font-size:.68rem;color:var(--text-muted);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);padding:3px 8px;border-radius:5px;font-family:'SF Mono','Fira Code',monospace;transition:color .3s,border-color .3s,background .3s}
+.format-hint.active{color:var(--accent-green);border-color:rgba(87,242,135,.3);background:rgba(87,242,135,.05)}
+.format-hint.warn-active{color:var(--accent-yellow);border-color:rgba(254,231,92,.3);background:rgba(254,231,92,.05)}
 
-    /* Sistema de Pestañas */
-    .tabs {
-      display: flex;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 4px;
-      margin-bottom: 20px;
-    }
+/* Help box */
+.webhook-help{margin-top:10px;padding:10px 14px;background:rgba(88,101,242,.06);border:1px solid rgba(88,101,242,.15);border-radius:var(--radius-sm);font-size:.74rem;color:var(--text-secondary);line-height:1.65;display:none}
+.webhook-help.show{display:block;animation:fadeSlideUp .3s ease-out}
+.webhook-help strong{color:var(--accent-cyan);font-weight:600}
+.webhook-help .step{display:flex;gap:8px;margin:4px 0}
+.webhook-help .step-num{flex-shrink:0;width:18px;height:18px;border-radius:50%;background:rgba(88,101,242,.2);color:var(--accent-purple);font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center}
 
-    .tab {
-      flex: 1;
-      padding: 8px;
-      text-align: center;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: var(--text-dim);
-    }
+/* Inputs */
+.input-wrapper{display:flex;align-items:stretch;gap:8px}
+.input-wrapper.full{display:block}
+input[type="text"],input[type="number"],textarea{width:100%;background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);font-family:var(--font-body);font-size:.92rem;padding:13px 16px;outline:none;transition:border-color .3s,box-shadow .3s,background .3s}
+input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:var(--accent-purple);box-shadow:0 0 0 3px rgba(88,101,242,.15);background:rgba(255,255,255,.06)}
+input::placeholder,textarea::placeholder{color:var(--text-muted)}
+textarea{resize:vertical;min-height:110px;max-height:300px;line-height:1.55}
 
-    .tab-title {
-      font-size: 13px;
-      font-weight: 500;
-      display: block;
-    }
+.input-error{border-color:var(--accent-red)!important;box-shadow:0 0 0 3px rgba(237,66,69,.15)!important;animation:inputShake .5s ease!important}
+@keyframes inputShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-6px)}30%{transform:translateX(5px)}45%{transform:translateX(-4px)}60%{transform:translateX(3px)}75%{transform:translateX(-2px)}90%{transform:translateX(1px)}}
+.input-ok{border-color:var(--accent-green)!important;box-shadow:0 0 0 3px rgba(87,242,135,.15)!important;transition:border-color .6s,box-shadow .6s}
 
-    .tab-sub {
-      font-size: 9px;
-      opacity: 0.7;
-      display: block;
-    }
+.error-msg{color:var(--accent-red);font-size:.78rem;margin-top:6px;display:none;align-items:flex-start;gap:5px;line-height:1.5}
+.error-msg.show{display:flex}
+.error-msg i{font-size:.72rem;margin-top:2px;flex-shrink:0}
 
-    .tab.active {
-      background: var(--panel);
-      color: var(--accent);
-      border: 1px solid var(--border);
-    }
+/* Paste Button */
+.btn-paste{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:0 16px;background:rgba(88,101,242,.12);border:1.5px solid rgba(88,101,242,.25);border-radius:var(--radius-md);color:var(--accent-purple);font-family:var(--font-body);font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;position:relative;overflow:hidden;contain:layout paint;-webkit-tap-highlight-color:transparent;transition:background .25s,border-color .25s;--rx:50%;--ry:50%}
+.btn-paste:hover{background:rgba(88,101,242,.2);border-color:rgba(88,101,242,.4)}
+.btn-paste::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--rx) var(--ry),rgba(255,255,255,.25) 0%,transparent 55%);opacity:0;pointer-events:none;border-radius:inherit}
+.btn-paste.rp::after{animation:rpFade .45s ease-out forwards}
+@keyframes rpFade{0%{opacity:1}100%{opacity:0}}
 
-    .panel { display: none; }
-    .panel.active { display: block; }
+/* Char counter */
+.char-counter{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:.75rem;color:var(--text-muted)}
+.char-counter .ct{font-variant-numeric:tabular-nums;transition:color .3s}
+.char-counter .ct.warn{color:var(--accent-yellow)}
+.char-counter .ct.danger{color:var(--accent-red)}
+.char-counter .fn{font-size:.68rem;color:var(--accent-magenta);opacity:.7;max-width:60%;text-align:right;line-height:1.3}
 
-    /* Inputs y Controles */
-    .field-group {
-      margin-bottom: 16px;
-    }
+/* Count selector */
+.count-selector{display:flex;align-items:center;gap:16px}
+.count-selector input[type="range"]{flex:1;-webkit-appearance:none;appearance:none;height:6px;background:rgba(255,255,255,.08);border-radius:3px;outline:none;border:none;padding:0;cursor:pointer}
+.count-selector input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--gradient-btn);border:3px solid var(--bg-secondary);box-shadow:0 0 12px rgba(88,101,242,.4);cursor:pointer}
+.count-selector input[type="range"]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--gradient-btn);border:3px solid var(--bg-secondary);box-shadow:0 0 12px rgba(88,101,242,.4);cursor:pointer}
+.count-num{width:68px;text-align:center;font-family:var(--font-display);font-weight:700;font-size:1.3rem;background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius-md);color:var(--accent-cyan);padding:8px 4px;outline:none;transition:border-color .3s,box-shadow .3s;-moz-appearance:textfield}
+.count-num::-webkit-inner-spin-button,.count-num::-webkit-outer-spin-button{-webkit-appearance:none}
+.count-num:focus{border-color:var(--accent-cyan);box-shadow:0 0 0 3px rgba(0,212,255,.15)}
+.count-num.pop{animation:cPop .25s ease-out}
+@keyframes cPop{50%{transform:scale(1.12)}}
 
-    .label-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
+/* Preview */
+.preview-section{margin-bottom:28px;opacity:0;animation:fadeSlideUp .6s ease-out .52s forwards}
+.preview-hdr{font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.preview-hdr i{color:var(--accent-cyan)}
+.preview-box{background:#2b2d31;border-radius:var(--radius-md);padding:16px;border:1px solid rgba(255,255,255,.05);max-height:200px;overflow-y:auto}
+.preview-msg{display:flex;gap:14px}
+.preview-avatar{width:40px;height:40px;border-radius:50%;background:var(--gradient-btn);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;font-weight:700}
+.preview-content{flex:1;min-width:0}
+.preview-name{font-weight:600;font-size:.92rem;color:var(--accent-purple);display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.preview-name .bot-tag{background:var(--accent-purple);color:#fff;font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.03em}
+.preview-text{font-size:.88rem;color:#dbdee1;line-height:1.5;word-break:break-word;white-space:pre-wrap}
+.preview-text .ft{color:var(--accent-magenta);opacity:.85;display:block;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:.82rem}
+.preview-empty{color:var(--text-muted);font-size:.85rem;font-style:italic;text-align:center;padding:20px 0}
 
-    .label-main {
-      font-size: 12px;
-      color: var(--text);
-      display: block;
-    }
+/* Buttons — pure CSS ripple, zero transform */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:var(--radius-md);font-family:var(--font-body);font-size:.92rem;font-weight:600;border:none;cursor:pointer;position:relative;overflow:hidden;contain:layout paint;-webkit-tap-highlight-color:transparent;user-select:none;transition:background .25s,color .25s,box-shadow .25s,border-color .25s,opacity .25s,filter .15s;outline:none;--rx:50%;--ry:50%}
+.btn:focus-visible{outline:2px solid var(--accent-cyan);outline-offset:2px}
+.btn::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--rx) var(--ry),rgba(255,255,255,.22) 0%,transparent 50%);opacity:0;pointer-events:none;border-radius:inherit}
+.btn.rp::after{animation:rpFade .4s ease-out forwards}
 
-    .label-sub {
-      font-size: 9px;
-      color: var(--text-dim);
-      display: block;
-    }
+.btn-reset{flex:0 0 auto;background:rgba(255,255,255,.06);color:var(--text-secondary);border:1.5px solid var(--border)}
+.btn-reset:hover{background:rgba(255,255,255,.1);color:var(--text-primary);border-color:rgba(255,255,255,.15)}
+.btn-reset:active{filter:brightness(0.85)}
 
-    .file-label {
-      text-align: right;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
+.btn-send{flex:1;background:var(--gradient-btn);color:#fff;box-shadow:0 4px 20px rgba(88,101,242,.35);font-size:1rem;padding:16px 32px}
+.btn-send:hover:not(:disabled){box-shadow:0 6px 28px rgba(88,101,242,.45)}
+.btn-send:active:not(:disabled){filter:brightness(0.9)}
+.btn-send:disabled{opacity:.5;cursor:not-allowed;filter:saturate(0.6)}
+.btn-send.sending{background:linear-gradient(135deg,#3d45a0,#5b3a8a);animation:sendPulse 1.5s ease-in-out infinite}
+@keyframes sendPulse{0%,100%{box-shadow:0 4px 20px rgba(88,101,242,.3)}50%{box-shadow:0 4px 36px rgba(88,101,242,.5)}}
+.btn-send.cancel-mode{background:linear-gradient(135deg,#c0392b,#8e2020);box-shadow:0 4px 20px rgba(237,66,69,.35);animation:cancelPulse 1s ease-in-out infinite}
+@keyframes cancelPulse{0%,100%{box-shadow:0 4px 20px rgba(237,66,69,.3)}50%{box-shadow:0 4px 36px rgba(237,66,69,.5)}}
 
-    .file-main {
-      font-size: 12px;
-      color: var(--accent);
-      display: block;
-    }
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-    .file-sub {
-      font-size: 9px;
-      color: var(--text-dim);
-      display: block;
-    }
+/* Progress */
+.progress-section{margin-top:28px;display:none}
+.progress-section.visible{display:block;animation:fadeSlideUp .4s ease-out}
+.progress-stats{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:.82rem}
+.progress-stats .st{display:flex;align-items:center;gap:5px}
+.progress-stats .st.ok{color:var(--accent-green)}
+.progress-stats .st.fail{color:var(--accent-red)}
+.progress-stats .st.tot{color:var(--text-secondary)}
+.progress-track{width:100%;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:var(--gradient-btn);border-radius:4px;transition:width .35s ease;position:relative}
+.progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:shimmer 1.5s ease-in-out infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
-    .file-label:hover .file-main {
-      color: #ff5566;
-    }
+/* Log */
+.log-section{margin-top:24px;display:none}
+.log-section.visible{display:block;animation:fadeSlideUp .4s ease-out}
+.log-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.log-hdr-title{font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.log-hdr-title i{color:var(--accent-green)}
+.log-actions{display:flex;gap:6px}
 
-    .file-input {
-      display: none;
-    }
+.log-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-secondary);font-family:var(--font-body);font-size:.72rem;font-weight:500;cursor:pointer;position:relative;overflow:hidden;contain:layout paint;-webkit-tap-highlight-color:transparent;transition:background .25s,color .25s;--rx:50%;--ry:50%}
+.log-btn:hover{background:rgba(255,255,255,.1);color:var(--text-primary)}
+.log-btn:active{filter:brightness(0.85)}
+.log-btn::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--rx) var(--ry),rgba(255,255,255,.15) 0%,transparent 50%);opacity:0;pointer-events:none;border-radius:inherit}
+.log-btn.rp::after{animation:rpFade .4s ease-out forwards}
 
-    textarea, .output-box {
-      width: 100%;
-      height: 160px;
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      line-height: 1.5;
-      outline: none;
-      resize: none;
-      transition: border-color 0.2s;
-    }
+.log-box{background:#0d0d15;border:1px solid rgba(255,255,255,.04);border-radius:var(--radius-md);padding:14px;max-height:220px;overflow-y:auto;font-family:'SF Mono','Fira Code',monospace;font-size:.76rem;line-height:1.7}
+.log-entry{display:flex;gap:8px;padding:2px 0;animation:logIn .3s ease-out}
+@keyframes logIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.log-entry .tm{color:var(--text-muted);flex-shrink:0}
+.log-entry .ix{color:var(--accent-cyan);flex-shrink:0;min-width:52px}
+.log-entry .sok{color:var(--accent-green)}
+.log-entry .sfl{color:var(--accent-red)}
+.log-entry .dt{color:var(--text-muted)}
 
-    textarea:focus {
-      border-color: var(--border-focus);
-    }
+/* Disclaimer */
+.disclaimer{margin-top:32px;padding:18px 20px;background:rgba(254,231,92,.06);border:1px solid rgba(254,231,92,.15);border-radius:var(--radius-md);opacity:0;animation:fadeSlideUp .6s ease-out .7s forwards}
+.disclaimer p{font-size:.78rem;color:var(--accent-yellow);opacity:.85;line-height:1.6;display:flex;align-items:flex-start;gap:8px}
+.disclaimer p i{margin-top:3px;flex-shrink:0}
 
-    .output-box {
-      height: 160px;
-      overflow: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
+/* Footer */
+.site-footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid var(--border);opacity:0;animation:fadeSlideUp .6s ease-out .8s forwards}
+.footer-brand{font-family:var(--font-display);font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:8px}
+.footer-wm{font-size:.72rem;font-weight:700;letter-spacing:.06em;background:linear-gradient(90deg,var(--accent-magenta),var(--accent-purple),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:wmShimmer 4s ease-in-out infinite;background-size:200% 100%}
+@keyframes wmShimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.footer-keys{margin-top:12px;font-size:.68rem;color:var(--text-muted);opacity:.6}
+.footer-keys kbd{display:inline-block;padding:2px 6px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:4px;font-family:var(--font-body);font-size:.65rem}
 
-    /* Diseño alineado (Ofuscar y Limpiar lado a lado) */
-    .btn-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
+/* Toasts */
+.toast-box{position:fixed;top:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:14px 20px;background:#1e1e30;border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:0 8px 32px rgba(0,0,0,.5);font-size:.85rem;color:var(--text-primary);pointer-events:auto;animation:tIn .35s ease-out;max-width:400px}
+.toast.out{animation:tOut .25s ease-in forwards}
+.toast.success{border-left:3px solid var(--accent-green)}
+.toast.error{border-left:3px solid var(--accent-red)}
+.toast.info{border-left:3px solid var(--accent-cyan)}
+.toast.warn{border-left:3px solid var(--accent-yellow)}
+.toast i{font-size:1rem;flex-shrink:0}
+.toast.success i{color:var(--accent-green)}
+.toast.error i{color:var(--accent-red)}
+.toast.info i{color:var(--accent-cyan)}
+.toast.warn i{color:var(--accent-yellow)}
+@keyframes tIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes tOut{to{opacity:0;transform:translateX(30px)}}
 
-    .action-group {
-      display: grid;
-      grid-template-columns: 3fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+/* Flash */
+.flash{position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:0}
+.flash.rf{animation:rf .4s ease-out}
+@keyframes rf{0%{opacity:.2;background:var(--accent-red)}100%{opacity:0}}
+.flash.gf{animation:gf .5s ease-out}
+@keyframes gf{0%{opacity:.12;background:var(--accent-green)}100%{opacity:0}}
 
-    button {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: transparent;
-      color: var(--text);
-    }
+/* Confetti */
+.confetti{position:fixed;z-index:9997;pointer-events:none;width:8px;height:8px;border-radius:2px;animation:cfall 1.5s ease-out forwards}
+@keyframes cfall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(400px) rotate(720deg)}}
 
-    button:hover {
-      background: var(--border);
-      border-color: var(--border-focus);
-    }
+.glitch{animation:gl .3s ease-in-out 3}
+@keyframes gl{0%{filter:hue-rotate(0deg)}25%{filter:hue-rotate(90deg)}50%{filter:hue-rotate(180deg)}75%{filter:hue-rotate(270deg)}100%{filter:hue-rotate(0deg)}}
 
-    .btn-main {
-      font-size: 13px;
-      font-weight: 500;
-      display: block;
-    }
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-    .btn-sub {
-      font-size: 9px;
-      color: var(--text-dim);
-      display: block;
-    }
-
-    button.primary {
-      background: var(--accent);
-      color: #000;
-      border: none;
-    }
-
-    button.primary .btn-sub {
-      color: #330005;
-    }
-
-    button.primary:hover {
-      background: #ff5566;
-    }
-
-    /* Alerta Lua Superior */
-    .lua-warning {
-      padding: 12px;
-      text-align: center;
-      border: 1px dashed var(--accent-dim);
-      border-radius: 8px;
-      background: rgba(255, 51, 68, 0.04);
-      margin-bottom: 16px;
-    }
-
-    .warn-main {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 2px;
-    }
-
-    .warn-sub {
-      font-size: 9px;
-      color: var(--text-dim);
-    }
-
-    .preview-container {
-      margin-top: 16px;
-      display: none;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #000;
-    }
-  </style>
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media(max-width:640px){.page-wrapper{padding:24px 14px 40px}.glass-card{padding:24px 18px;border-radius:var(--radius-lg)}.btn-row{flex-direction:column-reverse}.btn-send{padding:14px 24px}.count-selector{gap:10px}.count-num{width:58px;font-size:1.1rem}.toast-box{top:12px;right:12px;left:12px}.toast{max-width:100%;font-size:.8rem}.char-counter{flex-direction:column;gap:4px;align-items:flex-start}.char-counter .fn{max-width:100%;text-align:left}.format-hint{font-size:.6rem;padding:2px 6px}.webhook-help{font-size:.68rem}}
+</style>
 </head>
 <body>
 
-  <div class="window" id="dragWindow">
-    <div class="header" id="dragHeader">
-      <div class="logo">GARAMA <span>OBFUSCATOR PRO</span></div>
-      <div class="version">Engine v4</div>
+<div class="bg-blobs" aria-hidden="true"><div class="blob"></div><div class="blob"></div><div class="blob"></div></div>
+<canvas id="particleCanvas" aria-hidden="true"></canvas>
+<div class="flash" id="flash" aria-hidden="true"></div>
+<div class="toast-box" id="toasts" role="status" aria-live="polite"></div>
+
+<div class="page-wrapper">
+  <header class="header">
+    <div class="header-icon" aria-hidden="true"><i class="fas fa-bolt"></i></div>
+    <h1>Webhook Pulse</h1>
+    <p>Send customized messages through Discord webhooks with precision control and real-time feedback.</p>
+  </header>
+
+  <main>
+    <div class="glass-card" role="form" aria-label="Webhook message sender form">
+
+      <div class="form-group">
+        <label class="form-label" for="whUrl">
+          <i class="fas fa-link"></i> Webhook URL
+          <span class="tip" tabindex="0"><i class="fas fa-circle-info"></i>
+            <span class="tip-text">The full webhook URL from Discord channel settings</span>
+          </span>
+        </label>
+        <div class="input-wrapper">
+          <input type="text" id="whUrl" placeholder="https://discord.com/api/webhooks/..." autocomplete="off" spellcheck="false" aria-required="true">
+          <button class="btn-paste" id="bPaste" type="button" aria-label="Paste from clipboard"><i class="fas fa-paste"></i> Paste</button>
+        </div>
+        <div class="format-hints" id="fmtHints">
+          <span class="format-hint" data-t="full">Webhook URL</span>
+          <span class="format-hint" data-t="snowflake">Channel / Server ID</span>
+        </div>
+
+        <div class="webhook-help" id="whHelp">
+          <div style="margin-bottom:6px;color:var(--accent-yellow);font-weight:600;display:flex;align-items:center;gap:6px">
+            <i class="fas fa-triangle-exclamation" style="font-size:.7rem"></i>
+            That looks like a channel or server ID, not a webhook.
+          </div>
+          <div style="margin-bottom:4px">Channel and server IDs <strong>cannot send messages directly</strong> — you need a webhook URL created inside that channel.</div>
+          <div style="margin-top:8px;font-weight:600;color:var(--text-primary);margin-bottom:4px">How to get the webhook URL:</div>
+          <div class="step"><span class="step-num">1</span><span>Open your Discord server, go to the target <strong>channel</strong></span></div>
+          <div class="step"><span class="step-num">2</span><span>Click the <strong>gear icon</strong> (Edit Channel) next to the channel name</span></div>
+          <div class="step"><span class="step-num">3</span><span>Go to <strong>Integrations</strong> tab &rarr; click <strong>Webhooks</strong></span></div>
+          <div class="step"><span class="step-num">4</span><span>Click <strong>New Webhook</strong> &rarr; give it a name &rarr; click <strong>Copy Webhook URL</strong></span></div>
+          <div class="step"><span class="step-num">5</span><span>Paste that full URL here</span></div>
+        </div>
+
+        <div class="error-msg" id="urlErr" role="alert"><i class="fas fa-exclamation-circle"></i><span></span></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="botNm">
+          <i class="fas fa-robot"></i> Bot Username
+          <span class="tip" tabindex="0"><i class="fas fa-circle-info"></i>
+            <span class="tip-text">Custom sender name shown in Discord (max 32 chars)</span>
+          </span>
+        </label>
+        <div class="input-wrapper full">
+          <input type="text" id="botNm" placeholder="WebhookPulse Bot" maxlength="32" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="msgTxt">
+          <i class="fas fa-comment-dots"></i> Message Content
+          <span class="tip" tabindex="0"><i class="fas fa-circle-info"></i>
+            <span class="tip-text">Your message text. Footer is auto-appended. Max 1932 chars.</span>
+          </span>
+        </label>
+        <div class="input-wrapper full">
+          <textarea id="msgTxt" placeholder="Type your message here..." maxlength="1932" aria-required="true"></textarea>
+        </div>
+        <div class="char-counter">
+          <span class="ct" id="charCt">0 / 1932</span>
+          <span class="fn">Footer: "RAIDED BY AL9 JOIN discord.gg/8mSvtgF2N FOR FREE SOURCES AND MORE"</span>
+        </div>
+        <div class="error-msg" id="msgErr" role="alert"><i class="fas fa-exclamation-circle"></i><span></span></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="msgCt">
+          <i class="fas fa-layer-group"></i> Number of Messages
+          <span class="tip" tabindex="0"><i class="fas fa-circle-info"></i>
+            <span class="tip-text">How many times to send (1-100). 300ms delay between each.</span>
+          </span>
+        </label>
+        <div class="count-selector">
+          <input type="range" id="msgSl" min="1" max="100" value="1" aria-label="Message count slider">
+          <input type="number" class="count-num" id="msgCt" min="1" max="100" value="1" aria-label="Message count">
+        </div>
+      </div>
+
+      <section class="preview-section" aria-label="Message preview">
+        <div class="preview-hdr"><i class="fas fa-eye"></i> Live Preview</div>
+        <div class="preview-box" id="pvBox">
+          <div class="preview-empty" id="pvEmpty">Start typing to see a preview...</div>
+          <div class="preview-msg" id="pvMsg" style="display:none">
+            <div class="preview-avatar" id="pvAv">W</div>
+            <div class="preview-content">
+              <div class="preview-name"><span id="pvNm">WebhookPulse Bot</span><span class="bot-tag">BOT</span></div>
+              <div class="preview-text" id="pvTxt"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="btn-row" style="display:flex;gap:12px;opacity:0;animation:fadeSlideUp .6s ease-out .58s forwards">
+        <button class="btn btn-reset" id="bReset" type="button"><i class="fas fa-rotate-left"></i> Reset</button>
+        <button class="btn btn-send" id="bSend" type="button"><i class="fas fa-paper-plane" id="sendIco"></i> <span id="sendTxt">Send Messages</span></button>
+      </div>
+
+      <section class="progress-section" id="progSec" aria-label="Progress">
+        <div class="progress-stats">
+          <span class="st tot" id="progLbl">Sending 0 / 0</span>
+          <span class="st ok" id="sOk"><i class="fas fa-check"></i> 0</span>
+          <span class="st fail" id="sFl"><i class="fas fa-xmark"></i> 0</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-fill" id="progFill"></div>
+        </div>
+      </section>
+
+      <section class="log-section" id="logSec" aria-label="Log">
+        <div class="log-hdr">
+          <div class="log-hdr-title"><i class="fas fa-terminal"></i> Output Log</div>
+          <div class="log-actions">
+            <button class="log-btn" id="bCopy" type="button"><i class="fas fa-copy"></i> Copy</button>
+            <button class="log-btn" id="bExport" type="button"><i class="fas fa-download"></i> Export</button>
+          </div>
+        </div>
+        <div class="log-box" id="logBox" role="log" aria-live="polite"></div>
+      </section>
+
     </div>
 
-    <div class="content-body">
-      <div class="tabs">
-        <div class="tab active" data-lang="js">
-          <span class="tab-title">JavaScript</span>
-          <span class="tab-sub">JavaScript</span>
-        </div>
-        <div class="tab" data-lang="py">
-          <span class="tab-title">Python</span>
-          <span class="tab-sub">Python</span>
-        </div>
-        <div class="tab" data-lang="lua">
-          <span class="tab-title">Lua</span>
-          <span class="tab-sub">Lua</span>
-        </div>
-      </div>
-
-      <div class="panel active" id="jsPanel">
-        <div class="field-group">
-          <div class="label-row">
-            <div class="label">
-              <span class="label-main">JavaScript Code</span>
-              <span class="label-sub">Código JavaScript</span>
-            </div>
-            <label class="file-label">
-              <span class="file-main">Load file...</span>
-              <span class="file-sub">Cargar archivo...</span>
-              <input type="file" class="file-input" accept=".js" onchange="loadFile(this, 'jsInput')">
-            </label>
-          </div>
-          <textarea id="jsInput" placeholder="Paste your JavaScript code here... / Pega tu código aquí..."></textarea>
-        </div>
-        <div class="action-group">
-          <button class="primary" onclick="obfJS()">
-            <span class="btn-main">Obfuscate Code</span>
-            <span class="btn-sub">Ofuscar Código</span>
-          </button>
-          <button onclick="clearInput('jsInput')">
-            <span class="btn-main">Clear</span>
-            <span class="btn-sub">Limpiar</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="panel" id="pyPanel">
-        <div class="field-group">
-          <div class="label-row">
-            <div class="label">
-              <span class="label-main">Python Code</span>
-              <span class="label-sub">Código Python</span>
-            </div>
-            <label class="file-label">
-              <span class="file-main">Load file...</span>
-              <span class="file-sub">Cargar archivo...</span>
-              <input type="file" class="file-input" accept=".py" onchange="loadFile(this, 'pyInput')">
-            </label>
-          </div>
-          <textarea id="pyInput" placeholder="Paste your Python code here... / Pega tu código aquí..."></textarea>
-        </div>
-        <div class="action-group">
-          <button class="primary" onclick="obfPY()">
-            <span class="btn-main">Obfuscate Code</span>
-            <span class="btn-sub">Ofuscar Código</span>
-          </button>
-          <button onclick="clearInput('pyInput')">
-            <span class="btn-main">Clear</span>
-            <span class="btn-sub">Limpiar</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="panel" id="luaPanel">
-        <div class="lua-warning">
-          <div class="warn-main">MODULE UNDER UPDATE / CURRENT BUGS</div>
-          <div class="warn-sub">Módulo actualizando / Hay fallos de momento</div>
-        </div>
-        <div class="field-group">
-          <div class="label-row">
-            <div class="label">
-              <span class="label-main">Lua Code</span>
-              <span class="label-sub">Código Lua</span>
-            </div>
-            <label class="file-label">
-              <span class="file-main">Load file...</span>
-              <span class="file-sub">Cargar archivo...</span>
-              <input type="file" class="file-input" accept=".lua" onchange="loadFile(this, 'luaInput')">
-            </label>
-          </div>
-          <textarea id="luaInput" placeholder="Paste your Lua code here... / Pega tu código aquí..."></textarea>
-        </div>
-        <div class="action-group">
-          <button class="primary" onclick="obfLUA()">
-            <span class="btn-main">Obfuscate Code</span>
-            <span class="btn-sub">Ofuscar Código</span>
-          </button>
-          <button onclick="clearInput('luaInput')">
-            <span class="btn-main">Clear</span>
-            <span class="btn-sub">Limpiar</span>
-          </button>
-        </div>
-      </div>
-
-      <div id="outputSection" style="margin-top: 20px; display: none;">
-        <div class="field-group">
-          <div class="label-row">
-            <div class="label">
-              <span class="label-main">Obfuscated Result</span>
-              <span class="label-sub">Resultado Ofuscado</span>
-            </div>
-          </div>
-          <div class="output-box" id="outCode"></div>
-        </div>
-        
-        <div class="btn-group">
-          <button onclick="copyOut()">
-            <span class="btn-main">Copy Result</span>
-            <span class="btn-sub">Copiar Resultado</span>
-          </button>
-          <button onclick="downloadOut()">
-            <span class="btn-main">Download</span>
-            <span class="btn-sub">Descargar</span>
-          </button>
-          <button id="runBtn" style="grid-column: span 2; display: none;" onclick="runPreview()">
-            <span class="btn-main">Run Preview</span>
-            <span class="btn-sub">Ejecutar Vista Previa</span>
-          </button>
-        </div>
-
-        <div class="preview-container" id="previewWrapper">
-          <div class="label-main" style="margin-bottom: 6px; font-size: 12px;">Execution Console / Consola</div>
-          <div id="previewArea"></div>
-        </div>
-      </div>
-
+    <div class="disclaimer" role="note">
+      <p><i class="fas fa-triangle-exclamation"></i><span>This tool is for <strong>educational purposes only</strong> to demonstrate AI web development capabilities. Misuse may violate Discord's Terms of Service.</span></p>
     </div>
-  </div>
+  </main>
 
-  <script>
-    // Configuración del Arrastre de Ventana
-    const win = document.getElementById('dragWindow');
-    const header = document.getElementById('dragHeader');
-    let isDragging = false;
-    let currentX, currentY, initialX, initialY;
-    let xOffset = 0, yOffset = 0;
+  <footer class="site-footer">
+    <div class="footer-brand">Webhook Pulse &mdash; Pure HTML, CSS & JS</div>
+    <div class="footer-wm">RAIDED BY AL9 JOIN discord.gg/8mSvtgF2N FOR FREE SOURCES AND MORE</div>
+    <div class="footer-keys"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> send &nbsp;|&nbsp; <kbd>Esc</kbd> cancel</div>
+  </footer>
+</div>
 
-    header.addEventListener('mousedown', dragStart);
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('mouseup', dragEnd);
-    header.addEventListener('touchstart', dragStart);
-    document.addEventListener('touchmove', drag);
-    document.addEventListener('touchend', dragEnd);
+<script>
+const FOOTER='\n\nRAIDED BY AL9 JOIN discord.gg/8mSvtgF2N FOR FREE SOURCES AND MORE';
+const FOOTER_DISP='RAIDED BY AL9 JOIN discord.gg/8mSvtgF2N FOR FREE SOURCES AND MORE';
+const MAX_CHARS=1932,DELAY=300,MAX_MSG=100;
+const BASE_URL='https://discord.com/api/webhooks/';
+const STORE_KEY='wp_settings';
 
-    function dragStart(e) {
-      let clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
-      let clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
-      initialX = clientX - xOffset;
-      initialY = clientY - yOffset;
-      if (e.target === header || header.contains(e.target)) isDragging = true;
+/*
+  Only two patterns matter now:
+  - full:     A complete webhook URL
+  - snowflake: Any 17-20 digit number (channel/server/user/role ID)
+               These CANNOT send messages — show the help guide
+*/
+const RE={
+  full:/^https?:\/\/(www\.)?(discord\.com|discordapp\.com)\/api\/webhooks\/\d{17,20}\/[a-zA-Z0-9_-]+\/?$/,
+  snowflake:/^\d{17,20}$/,
+};
+
+const S={sending:false,cancel:false,ok:0,fail:0,total:0,logs:[]};
+const q=s=>document.querySelector(s);
+const D={
+  canvas:q('#particleCanvas'),url:q('#whUrl'),name:q('#botNm'),
+  msg:q('#msgTxt'),slider:q('#msgSl'),count:q('#msgCt'),
+  charCt:q('#charCt'),pvEmpty:q('#pvEmpty'),pvMsg:q('#pvMsg'),
+  pvAv:q('#pvAv'),pvNm:q('#pvNm'),pvTxt:q('#pvTxt'),
+  bPaste:q('#bPaste'),bReset:q('#bReset'),bSend:q('#bSend'),
+  sendIco:q('#sendIco'),sendTxt:q('#sendTxt'),
+  progSec:q('#progSec'),progFill:q('#progFill'),progLbl:q('#progLbl'),
+  sOk:q('#sOk'),sFl:q('#sFl'),
+  logSec:q('#logSec'),logBox:q('#logBox'),
+  bCopy:q('#bCopy'),bExport:q('#bExport'),
+  urlErr:q('#urlErr'),urlErrS:q('#urlErr span'),
+  msgErr:q('#msgErr'),msgErrS:q('#msgErr span'),
+  flash:q('#flash'),toasts:q('#toasts'),
+  hints:q('#fmtHints'),whHelp:q('#whHelp'),
+};
+
+/* CSS-only ripple */
+function rp(e,btn){
+  const r=btn.getBoundingClientRect();
+  btn.style.setProperty('--rx',((e.clientX-r.left)/r.width*100)+'%');
+  btn.style.setProperty('--ry',((e.clientY-r.top)/r.height*100)+'%');
+  btn.classList.remove('rp');void btn.offsetWidth;btn.classList.add('rp');
+  setTimeout(()=>btn.classList.remove('rp'),450);
+}
+
+/*
+  Resolve webhook — only accepts full URLs.
+  Snowflakes (channel/server IDs) get a helpful error + guide.
+*/
+function resolveWebhook(input){
+  if(!input||!input.trim()) return{ok:false,err:'Webhook URL is required.'};
+  const t=input.trim();
+
+  if(RE.full.test(t)) return{ok:true,url:t,fmt:'full'};
+
+  if(RE.snowflake.test(t)) return{
+    ok:false,
+    err:'That\'s a channel or server ID ('+t+'), not a webhook URL. See the guide below.',
+    fmt:'snowflake'
+  };
+
+  return{ok:false,err:'Invalid format. Paste a full webhook URL starting with https://discord.com/api/webhooks/...'};
+}
+
+/* Live format detection */
+function updateHints(val){
+  D.hints.querySelectorAll('.format-hint').forEach(h=>h.classList.remove('active','warn-active'));
+  D.whHelp.classList.remove('show');
+  if(!val||!val.trim()) return;
+  const t=val.trim();
+  if(RE.full.test(t)){
+    D.hints.querySelector('[data-t="full"]').classList.add('active');
+  } else if(RE.snowflake.test(t)){
+    D.hints.querySelector('[data-t="snowflake"]').classList.add('warn-active');
+    D.whHelp.classList.add('show');
+  }
+}
+
+function valMsg(v){
+  if(!v||!v.trim()) return{ok:false,err:'Message content cannot be empty.'};
+  if(v.length>MAX_CHARS) return{ok:false,err:'Message too long. Max '+MAX_CHARS+' characters.'};
+  return{ok:true,msg:v.trim()};
+}
+function valCount(v){
+  const n=parseInt(v,10);
+  if(isNaN(n)||n<1) return{ok:false,err:'Must send at least 1 message.'};
+  if(n>MAX_MSG) return{ok:false,err:'Maximum '+MAX_MSG+' messages.'};
+  return{ok:true,n};
+}
+function sanitize(s){return s.replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();}
+
+function showErr(inp,errEl,errSp,msg){
+  inp.classList.add('input-error');errSp.textContent=msg;errEl.classList.add('show');
+  setTimeout(()=>inp.classList.remove('input-error'),600);
+}
+function clrErr(inp,errEl){inp.classList.remove('input-error','input-ok');errEl.classList.remove('show');}
+function clrAll(){clrErr(D.url,D.urlErr);clrErr(D.msg,D.msgErr);}
+
+let lastToast=0,lastToastMsg='';
+function toast(msg,type,dur){
+  type=type||'info';dur=dur||3500;
+  const now=Date.now();
+  if(msg===lastToastMsg&&now-lastToast<2500) return;
+  lastToast=now;lastToastMsg=msg;
+  const icons={success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info',warn:'fa-triangle-exclamation'};
+  const el=document.createElement('div');
+  el.className='toast '+type;
+  el.innerHTML='<i class="fas '+(icons[type]||icons.info)+'"></i><span>'+msg+'</span>';
+  D.toasts.appendChild(el);
+  setTimeout(()=>{el.classList.add('out');el.addEventListener('animationend',()=>el.remove());},dur);
+}
+
+function flash(c){D.flash.className='flash';void D.flash.offsetWidth;D.flash.classList.add(c+'f');}
+
+function confetti(){
+  const cols=['#5865F2','#00d4ff','#e040fb','#57F287','#FEE75C','#ED4245','#fff'];
+  for(let i=0;i<50;i++){
+    const p=document.createElement('div');p.className='confetti';
+    p.style.left=Math.random()*100+'vw';p.style.top=Math.random()*35+10+'vh';
+    p.style.background=cols[Math.floor(Math.random()*cols.length)];
+    p.style.width=(Math.random()*8+4)+'px';p.style.height=(Math.random()*8+4)+'px';
+    p.style.animationDuration=(Math.random()*1.5+1)+'s';p.style.animationDelay=Math.random()*0.4+'s';
+    document.body.appendChild(p);p.addEventListener('animationend',()=>p.remove());
+  }
+}
+
+function updPreview(){
+  const nm=D.name.value.trim()||'WebhookPulse Bot';
+  const has=D.msg.value.trim().length>0;
+  D.pvEmpty.style.display=has?'none':'block';
+  D.pvMsg.style.display=has?'flex':'none';
+  if(has){
+    D.pvAv.textContent=nm.charAt(0).toUpperCase();
+    D.pvNm.textContent=nm;
+    D.pvTxt.innerHTML='';
+    D.pvTxt.appendChild(document.createTextNode(sanitize(D.msg.value)));
+    const f=document.createElement('span');f.className='ft';f.textContent=FOOTER_DISP;
+    D.pvTxt.appendChild(f);
+  }
+}
+function updChar(){
+  const l=D.msg.value.length;
+  D.charCt.textContent=l+' / '+MAX_CHARS;
+  D.charCt.className='ct'+(l>MAX_CHARS*0.9?' danger':l>MAX_CHARS*0.75?' warn':'');
+}
+function syncCnt(src){
+  let v=parseInt(src.value,10);if(isNaN(v)||v<1)v=1;if(v>MAX_MSG)v=MAX_MSG;
+  if(src===D.slider) D.count.value=v; else D.slider.value=v;
+  D.count.classList.remove('pop');void D.count.offsetWidth;D.count.classList.add('pop');
+}
+
+function addLog(idx,tot,ok,det){
+  const d=new Date();
+  const t=[d.getHours(),d.getMinutes(),d.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
+  S.logs.push({t,idx,tot,ok,det});
+  const el=document.createElement('div');el.className='log-entry';
+  el.innerHTML='<span class="tm">['+t+']</span><span class="ix">['+idx+'/'+tot+']</span>'+
+    '<span class="'+(ok?'sok':'sfl')+'">'+(ok?'\u2713':'\u2717')+' '+(ok?'OK':'FAIL')+'</span>'+
+    (det?'<span class="dt">\u2014 '+det+'</span>':'');
+  D.logBox.appendChild(el);D.logBox.scrollTop=D.logBox.scrollHeight;
+}
+function clrLog(){S.logs=[];D.logBox.innerHTML='';}
+
+function updProg(){
+  const done=S.ok+S.fail;
+  const pct=S.total>0?done/S.total*100:0;
+  D.progFill.style.width=pct+'%';
+  D.progLbl.textContent='Sending '+done+' / '+S.total;
+  D.sOk.innerHTML='<i class="fas fa-check"></i> '+S.ok;
+  D.sFl.innerHTML='<i class="fas fa-xmark"></i> '+S.fail;
+}
+
+async function sendOne(url,payload,i,tot){
+  try{
+    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(r.ok){S.ok++;addLog(i,tot,true,r.status+' '+r.statusText);return true;}
+    if(r.status===429){
+      const w=r.headers.get('Retry-After');const ms=w?parseFloat(w)*1000:2000;
+      addLog(i,tot,false,'429 Rate limited, waiting '+Math.round(ms)+'ms');
+      await new Promise(r=>setTimeout(r,ms));
+      const r2=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      if(r2.ok){S.ok++;addLog(i,tot,true,'Retry OK '+r2.status);return true;}
+      S.fail++;addLog(i,tot,false,'Retry failed: '+r2.status);return false;
     }
+    if(r.status===404){S.fail++;addLog(i,tot,false,'404 Webhook not found');return false;}
+    if(r.status===401||r.status===403){S.fail++;addLog(i,tot,false,r.status+' Invalid token');return false;}
+    S.fail++;addLog(i,tot,false,r.status+' '+r.statusText);return false;
+  }catch(e){S.fail++;addLog(i,tot,false,e.name==='TypeError'?'Network error':e.message);return false;}
+}
 
-    function drag(e) {
-      if (!isDragging) return;
-      e.preventDefault();
-      let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
-      let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
-      currentX = clientX - initialX;
-      currentY = clientY - initialY;
-      xOffset = currentX;
-      yOffset = currentY;
-      win.style.transform = `translate(calc(-50% + ${currentX}px), ${currentY}px)`;
-    }
+async function doSend(){
+  clrAll();
+  const wh=resolveWebhook(D.url.value);
+  if(!wh.ok){
+    showErr(D.url,D.urlErr,D.urlErrS,wh.err);
+    D.url.focus();
+    if(wh.fmt==='snowflake') D.whHelp.classList.add('show');
+    return;
+  }
+  const mg=valMsg(D.msg.value);
+  if(!mg.ok){showErr(D.msg,D.msgErr,D.msgErrS,mg.err);D.msg.focus();return;}
+  const ct=valCount(D.count.value);
+  if(!ct.ok){toast(ct.err,'error');return;}
 
-    function dragEnd() { isDragging = false; }
+  const url=wh.url;
+  const fullMsg=mg.msg+FOOTER;
+  const botName=D.name.value.trim()||'WebhookPulse Bot';
+  const payload={content:fullMsg,username:botName};
 
-    // Control de Pestañas
-    const tabs = document.querySelectorAll('.tab');
-    const panels = document.querySelectorAll('.panel');
+  S.sending=true;S.cancel=false;S.ok=0;S.fail=0;S.total=ct.n;
+  clrLog();D.progSec.classList.add('visible');D.logSec.classList.add('visible');updProg();
 
-    tabs.forEach(tab => {
-      tab.onclick = () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        panels.forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById(`${tab.dataset.lang}Panel`).classList.add('active');
-        document.getElementById('outputSection').style.display = 'none';
-        document.getElementById('previewWrapper').style.display = 'none';
+  D.bSend.classList.add('sending');D.sendTxt.textContent='Cancel';
+  D.sendIco.className='fas fa-stop';D.bSend.classList.remove('cancel-mode');
+  D.url.disabled=D.msg.disabled=D.name.disabled=D.slider.disabled=D.count.disabled=D.bReset.disabled=true;
+
+  for(let i=1;i<=ct.n;i++){
+    if(S.cancel){addLog(i,ct.n,false,'Cancelled');S.fail++;updProg();break;}
+    await sendOne(url,payload,i,ct.n);updProg();
+    if(i===1&&S.fail===1&&S.ok===0){
+      const last=S.logs[S.logs.length-1];
+      if(last&&(last.det.includes('404')||last.det.includes('Invalid token'))){
+        addLog(0,0,false,'Stopping \u2014 webhook invalid or deleted');break;
       }
-    });
-
-    // Cargar archivos locales
-    function loadFile(input, targetId) {
-      const file = input.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById(targetId).value = e.target.result;
-      };
-      reader.readAsText(file);
-      input.value = '';
     }
+    if(i<ct.n&&!S.cancel) await new Promise(r=>setTimeout(r,DELAY));
+  }
 
-    // Botón de limpieza
-    function clearInput(targetId) {
-      document.getElementById(targetId).value = '';
-      document.getElementById('outputSection').style.display = 'none';
-      document.getElementById('previewWrapper').style.display = 'none';
+  S.sending=false;
+  D.bSend.classList.remove('sending','cancel-mode');
+  D.sendTxt.textContent='Send Messages';D.sendIco.className='fas fa-paper-plane';
+  D.url.disabled=D.msg.disabled=D.name.disabled=D.slider.disabled=D.count.disabled=D.bReset.disabled=false;
+
+  const done=S.ok+S.fail;
+  if(S.cancel){toast('Cancelled. '+S.ok+' of '+done+' sent.','info');flash('r');}
+  else if(S.fail===0){toast('All '+S.ok+' sent successfully!','success');flash('g');confetti();q('.header h1').classList.add('glitch');setTimeout(()=>q('.header h1').classList.remove('glitch'),1200);}
+  else if(S.ok===0){toast('All '+S.fail+' failed.','error');flash('r');}
+  else{toast(S.ok+' sent, '+S.fail+' failed.','info');flash(S.ok>S.fail?'g':'r');}
+  D.progLbl.textContent='Complete '+done+' / '+ct.n;
+}
+
+function doCancel(){if(S.sending){S.cancel=true;D.bSend.classList.add('cancel-mode');D.sendTxt.textContent='Cancelling...';}}
+
+function doReset(){
+  if(S.sending) return;
+  clrAll();clrLog();D.url.value='';D.msg.value='';D.slider.value=1;D.count.value=1;
+  D.progSec.classList.remove('visible');D.logSec.classList.remove('visible');D.progFill.style.width='0%';
+  updChar();updPreview();updateHints('');
+  try{localStorage.removeItem(STORE_KEY);}catch(e){}
+  toast('Form reset.','info',2000);
+}
+
+function save(){try{localStorage.setItem(STORE_KEY,JSON.stringify({n:D.name.value,m:D.msg.value,c:D.count.value}));}catch(e){}}
+function load(){
+  try{
+    const r=localStorage.getItem(STORE_KEY);if(!r) return;
+    const d=JSON.parse(r);
+    if(d.n) D.name.value=d.n;if(d.m) D.msg.value=d.m;
+    if(d.c){const v=Math.min(Math.max(parseInt(d.c,10)||1,1),MAX_MSG);D.slider.value=v;D.count.value=v;}
+    updChar();updPreview();
+  }catch(e){}
+}
+
+function copyLog(){
+  if(!S.logs.length){toast('No log to copy.','info',2000);return;}
+  const t=S.logs.map(e=>'['+e.t+'] ['+e.idx+'/'+e.tot+'] '+(e.ok?'OK':'FAIL')+(e.det?' \u2014 '+e.det:'')).join('\n');
+  navigator.clipboard.writeText(t).then(()=>toast('Copied.','success',2000)).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:fixed;left:-9999px';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+    toast('Copied.','success',2000);
+  });
+}
+function exportLog(){
+  if(!S.logs.length){toast('No log to export.','info',2000);return;}
+  const h='Webhook Pulse Log\nDate: '+new Date().toLocaleString()+'\n'+'='.repeat(50)+'\n\n';
+  const l=S.logs.map(e=>'['+e.t+'] ['+e.idx+'/'+e.tot+'] '+(e.ok?'OK':'FAIL')+(e.det?' \u2014 '+e.det:'')).join('\n');
+  const f='\n\n'+'='.repeat(50)+'\nResult: '+S.ok+' sent, '+S.fail+' failed\nRAIDED BY AL9 JOIN discord.gg/8mSvtgF2N FOR FREE SOURCES AND MORE';
+  const b=new Blob([h+l+f],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='webhook-pulse-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(a.href);
+  toast('Exported.','success',2000);
+}
+
+async function doPaste(){
+  try{
+    const t=await navigator.clipboard.readText();
+    D.url.value=t.trim();clrErr(D.url,D.urlErr);updateHints(t.trim());
+    const r=resolveWebhook(t.trim());
+    if(r.ok){D.url.classList.add('input-ok');setTimeout(()=>D.url.classList.remove('input-ok'),1500);}
+    if(r.fmt==='snowflake'){toast('That\'s a channel/server ID, not a webhook. See the guide below.','warn',5000);}
+    else{toast('Pasted.','info',1500);}
+  }catch(e){toast('Clipboard access denied. Paste manually with Ctrl+V.','error');}
+}
+
+let saveT;
+function dSave(){clearTimeout(saveT);saveT=setTimeout(save,500);}
+
+function bind(){
+  D.bPaste.addEventListener('click',e=>{rp(e,D.bPaste);doPaste();});
+  D.url.addEventListener('input',()=>{clrErr(D.url,D.urlErr);updateHints(D.url.value);});
+  D.name.addEventListener('input',()=>{updPreview();dSave();});
+  D.msg.addEventListener('input',()=>{clrErr(D.msg,D.msgErr);updChar();updPreview();dSave();});
+  D.slider.addEventListener('input',()=>{syncCnt(D.slider);dSave();});
+  D.count.addEventListener('input',()=>{syncCnt(D.count);dSave();});
+  D.count.addEventListener('blur',()=>{let v=parseInt(D.count.value,10);if(isNaN(v)||v<1)v=1;if(v>MAX_MSG)v=MAX_MSG;D.count.value=v;D.slider.value=v;});
+  D.bSend.addEventListener('click',e=>{rp(e,D.bSend);S.sending?doCancel():doSend();});
+  D.bReset.addEventListener('click',e=>{rp(e,D.bReset);doReset();});
+  D.bCopy.addEventListener('click',e=>{rp(e,D.bCopy);copyLog();});
+  D.bExport.addEventListener('click',e=>{rp(e,D.bExport);exportLog();});
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();if(!S.sending) D.bSend.click();}
+    if(e.key==='Escape'&&S.sending) doCancel();
+  });
+}
+
+/* Particles */
+class Particles{
+  constructor(c){this.c=c;this.x=c.getContext('2d');this.p=[];this.m={x:-9e3,y:-9e3};this.resize();this.init();this.bindEv();this.loop();}
+  resize(){this.c.width=innerWidth;this.c.height=innerHeight;}
+  init(){
+    this.p=[];const n=Math.min(70,Math.floor(this.c.width*this.c.height/18000));
+    const cols=['rgba(88,101,242,','rgba(0,212,255,','rgba(224,64,251,','rgba(87,242,135,','rgba(254,231,92,'];
+    for(let i=0;i<n;i++) this.p.push({x:Math.random()*this.c.width,y:Math.random()*this.c.height,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,r:Math.random()*2+0.8,ba:Math.random()*0.4+0.1,a:0,col:cols[Math.floor(Math.random()*cols.length)],po:Math.random()*Math.PI*2,ps:Math.random()*0.02+0.005});
+  }
+  bindEv(){
+    let t;addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(()=>{this.resize();this.init()},200);});
+    document.addEventListener('mousemove',e=>{this.m.x=e.clientX;this.m.y=e.clientY;});
+    document.addEventListener('mouseleave',()=>{this.m.x=-9e3;this.m.y=-9e3;});
+  }
+  loop(){
+    const ctx=this.x,w=this.c.width,h=this.c.height,t=Date.now()*0.001;
+    ctx.clearRect(0,0,w,h);
+    for(const p of this.p){
+      p.a=p.ba+Math.sin(t*p.ps*60+p.po)*0.12;
+      const dx=p.x-this.m.x,dy=p.y-this.m.y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<150&&d>0){const f=(150-d)/150*0.8;p.vx+=dx/d*f*0.1;p.vy+=dy/d*f*0.1;}
+      p.vx*=0.995;p.vy*=0.995;p.x+=p.vx;p.y+=p.vy;
+      if(p.x<-10)p.x=w+10;if(p.x>w+10)p.x=-10;if(p.y<-10)p.y=h+10;if(p.y>h+10)p.y=-10;
+      const r=Math.max(0.5,p.r);ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
+      ctx.fillStyle=p.col+Math.max(0,p.a).toFixed(3)+')';ctx.fill();
+      if(r>1.5){ctx.beginPath();ctx.arc(p.x,p.y,r*3,0,Math.PI*2);ctx.fillStyle=p.col+(Math.max(0,p.a)*0.15).toFixed(3)+')';ctx.fill();}
     }
-
-    // Codificación Base64
-    function b64(str) { return btoa(unescape(encodeURIComponent(str))); }
-    let currentExt = 'txt';
-
-    function obfJS() {
-      const code = document.getElementById('jsInput').value.trim();
-      if (!code) return;
-      const out = `(()=>{eval(decodeURIComponent(escape(atob('${b64(code)}'))))})();`;
-      showOutput(out, 'js');
+    for(let i=0;i<this.p.length;i++)for(let j=i+1;j<this.p.length;j++){
+      const a=this.p[i],b=this.p[j],dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy;
+      if(d2<12000){const al=(1-d2/12000)*0.06;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle='rgba(88,101,242,'+al.toFixed(4)+')';ctx.lineWidth=0.5;ctx.stroke();}
     }
+    requestAnimationFrame(()=>this.loop());
+  }
+}
 
-    function obfPY() {
-      const code = document.getElementById('pyInput').value.trim();
-      if (!code) return;
-      const out = `import base64\nexec(base64.b64decode('${b64(code)}').decode())`;
-      showOutput(out, 'py');
-    }
-
-    function obfLUA() {
-      const code = document.getElementById('luaInput').value.trim();
-      if (!code) return;
-      const out = `-- [GARAMA OBFUSCATOR PRO]\n-- MODULE UNDER UPDATE / CURRENT BUGS\n-- Módulo actualizando / Hay fallos de momento\n\nlocal _ = "${b64(code)}"`;
-      showOutput(out, 'lua');
-    }
-
-    function showOutput(resultText, lang) {
-      currentExt = lang;
-      document.getElementById('outCode').innerText = resultText;
-      document.getElementById('outputSection').style.display = 'block';
-      const runBtn = document.getElementById('runBtn');
-      if (lang === 'js') {
-        runBtn.style.display = 'block';
-      } else {
-        runBtn.style.display = 'none';
-        document.getElementById('previewWrapper').style.display = 'none';
-      }
-    }
-
-    function copyOut() {
-      navigator.clipboard.writeText(document.getElementById('outCode').innerText);
-    }
-
-    function downloadOut() {
-      const text = document.getElementById('outCode').innerText;
-      if (!text) return;
-      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `obfuscated_${Date.now()}.${currentExt}`;
-      link.click();
-      URL.revokeObjectURL(link.href);
-    }
-
-    function runPreview() {
-      const code = document.getElementById('outCode').innerText;
-      const wrapper = document.getElementById('previewWrapper');
-      const area = document.getElementById('previewArea');
-      wrapper.style.display = 'block';
-      area.innerHTML = ''; 
-      const frame = document.createElement('iframe');
-      frame.sandbox = 'allow-scripts';
-      frame.srcdoc = `<!doctype html><html><body><script>${code}<\/script></body></html>`;
-      area.appendChild(frame);
-    }
-  </script>
+function init(){new Particles(D.canvas);load();bind();updPreview();updChar();updateHints('');}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+</script>
 </body>
 </html>
