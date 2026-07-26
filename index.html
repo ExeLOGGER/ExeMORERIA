@@ -3,21 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EXE Moreria - Choose Your Tool</title>
+<title>EXE HUB - Choose Your Tool</title>
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║  DISCORD OAUTH2 SETUP (required for login to work)      ║
+  ║  1. Go to https://discord.com/developers/applications   ║
+  ║  2. Create a new application                            ║
+  ║  3. Go to OAuth2 → Add Redirect URI = your page URL    ║
+  ║  4. Copy Client ID and paste it below                   ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0a0a0a;
-    --surface: #121212;
-    --panel: #1e1e1e;
-    --border: #333;
-    --neon: #ffffff;
-    --neon-glow: 0 0 10px rgba(255,255,255,0.8);
-    --text: #e0e0e0;
-    --muted: #888;
+    --bg: #0a0000;
+    --surface: #110000;
+    --panel: #1a0000;
+    --border: #3a0808;
+    --neon: #ff1e1e;
+    --neon-glow: 0 0 10px rgba(255,30,30,0.8);
+    --text: #e0d0d0;
+    --muted: #885555;
     --danger: #ff4444;
     --green: #00ff88;
+    --discord: #5865F2;
   }
   body {
     background: var(--bg);
@@ -32,20 +42,424 @@
     position: fixed;
     inset: 0;
     background-image:
-      radial-gradient(1px 1px at 10px 10px, rgba(255,255,255,0.9), transparent),
-      radial-gradient(1px 1px at 30px 20px, rgba(255,255,255,0.7), transparent),
-      radial-gradient(1px 1px at 50px 40px, rgba(255,255,255,1), transparent),
-      radial-gradient(1px 1px at 70px 10px, rgba(255,255,255,0.8), transparent),
-      radial-gradient(1px 1px at 90px 30px, rgba(255,255,255,0.6), transparent),
-      radial-gradient(1px 1px at 110px 50px, rgba(255,255,255,0.9), transparent),
-      radial-gradient(1px 1px at 130px 20px, rgba(255,255,255,0.7), transparent),
-      radial-gradient(1px 1px at 150px 40px, rgba(255,255,255,1), transparent);
+      radial-gradient(1px 1px at 10px 10px, rgba(255,30,30,0.6), transparent),
+      radial-gradient(1px 1px at 30px 20px, rgba(255,30,30,0.4), transparent),
+      radial-gradient(1px 1px at 50px 40px, rgba(255,30,30,0.7), transparent),
+      radial-gradient(1px 1px at 70px 10px, rgba(255,30,30,0.5), transparent),
+      radial-gradient(1px 1px at 90px 30px, rgba(255,30,30,0.3), transparent),
+      radial-gradient(1px 1px at 110px 50px, rgba(255,30,30,0.6), transparent),
+      radial-gradient(1px 1px at 130px 20px, rgba(255,30,30,0.4), transparent),
+      radial-gradient(1px 1px at 150px 40px, rgba(255,30,30,0.7), transparent);
     background-size: 200px 200px;
     pointer-events: none;
     z-index: 0;
     animation: float 30s infinite linear;
   }
   @keyframes float { 0% { transform: translate(0,0); } 100% { transform: translate(100px,100px); } }
+
+  /* ═══ TOP BAR ═══ */
+  .top-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    background: rgba(10,0,0,0.92);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    z-index: 500;
+    backdrop-filter: blur(10px);
+  }
+  .counter-widget {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .counter-widget .counter-num {
+    font-size: 1rem;
+    color: var(--neon);
+    text-shadow: var(--neon-glow);
+    font-weight: bold;
+  }
+  .counter-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--neon);
+    box-shadow: var(--neon-glow);
+    animation: blink 2s infinite;
+  }
+  .login-area {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .btn-discord {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    background: var(--discord);
+    border: none;
+    border-radius: 7px;
+    color: white;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 10px rgba(88,101,242,0.4);
+  }
+  .btn-discord:hover { background: #4752c4; box-shadow: 0 0 18px rgba(88,101,242,0.6); }
+  .btn-discord svg { width:16px; height:16px; }
+  .user-chip {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255,30,30,0.08);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.3rem 0.7rem;
+  }
+  .user-chip.show { display: flex; }
+  .user-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--neon);
+    background: var(--surface);
+  }
+  .user-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text);
+  }
+  .user-role-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    padding: 1px 5px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: bold;
+  }
+  .btn-logout {
+    padding: 0.3rem 0.6rem;
+    background: rgba(255,68,68,0.15);
+    border: 1px solid rgba(255,68,68,0.4);
+    border-radius: 5px;
+    color: var(--danger);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-logout:hover { background: rgba(255,68,68,0.28); }
+  .btn-admin {
+    padding: 0.3rem 0.6rem;
+    background: rgba(255,30,30,0.15);
+    border: 1px solid var(--neon);
+    border-radius: 5px;
+    color: var(--neon);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-shadow: var(--neon-glow);
+    display: none;
+  }
+  .btn-admin:hover { background: rgba(255,30,30,0.28); }
+  .btn-admin.show { display: block; }
+
+  /* ═══ MODALS ═══ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-box {
+    background: var(--panel);
+    border: 1px solid var(--neon);
+    border-radius: 14px;
+    padding: 2rem;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(255,30,30,0.2);
+    animation: fadeUp 0.3s ease both;
+  }
+  .modal-box h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--neon);
+    text-shadow: var(--neon-glow);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+  }
+  .modal-box p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  .modal-btns {
+    display: flex;
+    gap: 0.7rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-cancel {
+    padding: 0.55rem 1.1rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+
+  /* ═══ ADMIN PANEL ═══ */
+  .admin-modal-box {
+    background: var(--panel);
+    border: 1px solid var(--neon);
+    border-radius: 14px;
+    width: 92%;
+    max-width: 680px;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 40px rgba(255,30,30,0.25);
+    animation: fadeUp 0.3s ease both;
+  }
+  .admin-header {
+    padding: 1rem 1.4rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .admin-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--neon);
+    text-shadow: var(--neon-glow);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .admin-close {
+    width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(255,30,30,0.1);
+    color: var(--neon);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .admin-close:hover { background: rgba(255,30,30,0.3); }
+  .admin-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+  .admin-tab {
+    flex: 1;
+    padding: 0.7rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: color 0.2s, background 0.2s;
+    border: none;
+    background: none;
+  }
+  .admin-tab.active {
+    color: var(--neon);
+    text-shadow: var(--neon-glow);
+    background: rgba(255,30,30,0.07);
+    border-bottom: 2px solid var(--neon);
+  }
+  .admin-body { flex: 1; overflow-y: auto; padding: 1.2rem; }
+  .admin-tab-pane { display: none; }
+  .admin-tab-pane.active { display: block; }
+
+  /* Roles tab */
+  .role-form {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .role-name-input {
+    flex: 1;
+    min-width: 140px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 0.5rem 0.8rem;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .role-name-input:focus { border-color: var(--neon); }
+  .role-color-input {
+    width: 40px; height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--surface);
+    cursor: pointer;
+    padding: 2px;
+  }
+  .btn-add-role {
+    padding: 0.5rem 0.9rem;
+    background: rgba(255,30,30,0.15);
+    border: 1px solid var(--neon);
+    border-radius: 7px;
+    color: var(--neon);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+    text-shadow: var(--neon-glow);
+  }
+  .btn-add-role:hover { background: rgba(255,30,30,0.3); }
+  .roles-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .role-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .role-color-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .role-row-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    flex: 1;
+    color: var(--text);
+  }
+  .btn-del-role {
+    padding: 0.2rem 0.5rem;
+    background: rgba(255,68,68,0.12);
+    border: 1px solid rgba(255,68,68,0.3);
+    border-radius: 5px;
+    color: var(--danger);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-del-role:hover { background: rgba(255,68,68,0.28); }
+
+  /* Users tab */
+  .admin-section-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.7rem;
+  }
+  .user-rank-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+  }
+  .user-rank-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .user-rank-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text);
+    flex: 1;
+  }
+  .role-select {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .role-select:focus { border-color: var(--neon); }
+  .btn-assign-role {
+    padding: 0.3rem 0.6rem;
+    background: rgba(255,30,30,0.12);
+    border: 1px solid rgba(255,30,30,0.4);
+    border-radius: 5px;
+    color: var(--neon);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .btn-assign-role:hover { background: rgba(255,30,30,0.28); }
+  .admin-empty {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    padding: 2rem;
+    font-style: italic;
+  }
+
+  /* ═══ MAIN CONTENT ═══ */
   .home-screen {
     display: flex;
     flex-direction: column;
@@ -53,7 +467,7 @@
     justify-content: center;
     min-height: 100vh;
     text-align: center;
-    padding: 2rem;
+    padding: 5rem 2rem 2rem;
     z-index: 1;
     position: relative;
   }
@@ -105,9 +519,7 @@
   .tool-card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 2px;
     background: linear-gradient(to right, transparent, var(--neon), transparent);
     transform: scaleX(0);
@@ -115,24 +527,12 @@
   }
   .tool-card:hover {
     border-color: var(--neon);
-    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+    box-shadow: 0 0 20px rgba(255,30,30,0.2);
     transform: translateY(-4px);
   }
-  .tool-card:hover::before {
-    transform: scaleX(1);
-  }
-  .tool-icon {
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-  }
-  .tool-icon img {
-    max-height: 100%;
-    max-width: 100%;
-    object-fit: contain;
-  }
+  .tool-card:hover::before { transform: scaleX(1); }
+  .tool-icon { height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+  .tool-icon img { max-height: 100%; max-width: 100%; object-fit: contain; }
   .tool-name {
     font-family: 'Share Tech Mono', monospace;
     font-size: 1.1rem;
@@ -142,29 +542,16 @@
     text-shadow: var(--neon-glow);
     margin-bottom: 0.5rem;
   }
-  .tool-desc {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--muted);
-    line-height: 1.6;
-  }
+  .tool-desc { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--muted); line-height: 1.6; }
   @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: none; } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
-  .content-area {
-    display: none;
-    animation: fadeIn 0.4s ease both;
-    min-height: 100vh;
-    padding: 2rem 0;
-  }
-  .content-area.active {
-    display: block;
-  }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .content-area { display: none; animation: fadeIn 0.4s ease both; min-height: 100vh; padding: 2rem 0; }
+  .content-area.active { display: block; }
   .back-button {
     position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
+    top: 62px; left: 20px;
+    z-index: 400;
     padding: 0.7rem 1.2rem;
     background: var(--panel);
     border: 1px solid var(--neon);
@@ -181,10 +568,7 @@
     gap: 0.5rem;
     box-shadow: var(--neon-glow);
   }
-  .back-button:hover {
-    background: rgba(255,255,255,0.1);
-    box-shadow: 0 0 15px rgba(255,255,255,0.5);
-  }
+  .back-button:hover { background: rgba(255,30,30,0.15); box-shadow: 0 0 15px rgba(255,30,30,0.5); }
   .toast {
     position: fixed;
     bottom: 1.5rem;
@@ -206,18 +590,8 @@
   .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   .toast.success { border-color: var(--green); color: var(--green); }
   .toast.error { border-color: var(--danger); color: var(--danger); }
-  .tool-wrapper {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 1.5rem;
-    position: relative;
-    z-index: 1;
-  }
-  .tool-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    animation: fadeDown 0.55s ease both;
-  }
+  .tool-wrapper { max-width: 860px; margin: 0 auto; padding: 5rem 1.5rem 2rem; position: relative; z-index: 1; }
+  .tool-header { text-align: center; margin-bottom: 2rem; animation: fadeDown 0.55s ease both; }
   .tool-header h1 {
     font-size: clamp(1.7rem, 4vw, 2.7rem);
     font-weight: 700;
@@ -227,14 +601,7 @@
     text-shadow: var(--neon-glow);
     line-height: 1;
   }
-  .tool-header .tagline {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-top: 0.4rem;
-  }
+  .tool-header .tagline { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-top: 0.4rem; }
   .panel {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -248,50 +615,17 @@
   .panel:nth-child(2) { animation-delay: 0.13s; }
   .panel:nth-child(3) { animation-delay: 0.21s; }
   .panel:nth-child(4) { animation-delay: 0.29s; }
-  .ph {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.75rem 1.25rem;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-  }
-  .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    animation: blink 2.2s infinite;
-    box-shadow: var(--neon-glow);
-  }
+  .ph { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.25rem; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; animation: blink 2.2s infinite; box-shadow: var(--neon-glow); }
   .dot-cyan { background: var(--neon); }
   .dot-purple { background: var(--neon); animation-delay: 0.4s; }
   .dot-discord { background: var(--neon); animation-delay: 0.8s; }
   .dot-green { background: var(--green); animation-delay: 1.2s; }
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-  .ph-title {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--neon);
-    text-shadow: var(--neon-glow);
-  }
+  .ph-title { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--neon); text-shadow: var(--neon-glow); }
   .pb { padding: 1.25rem; }
-  .lbl {
-    display: block;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.13em;
-    color: var(--muted);
-    margin-bottom: 0.45rem;
-  }
-  .search-row {
-    display: flex;
-    gap: 0.6rem;
-    margin-bottom: 0.75rem;
-  }
+  .lbl { display: block; font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.13em; color: var(--muted); margin-bottom: 0.45rem; }
+  .search-row { display: flex; gap: 0.6rem; margin-bottom: 0.75rem; }
   .search-input {
     flex: 1;
     background: var(--surface);
@@ -304,14 +638,11 @@
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .search-input:focus {
-    border-color: var(--neon);
-    box-shadow: 0 0 10px rgba(255,255,255,0.5);
-  }
+  .search-input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(255,30,30,0.3); }
   .search-input::placeholder { color: var(--muted); }
   .btn-sm {
     padding: 0.5rem 0.9rem;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,30,30,0.1);
     border: 1px solid var(--neon);
     border-radius: 7px;
     color: var(--neon);
@@ -321,597 +652,588 @@
     letter-spacing: 0.08em;
     cursor: pointer;
     white-space: nowrap;
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.2s;
     text-shadow: var(--neon-glow);
   }
-  .btn-sm:hover {
-    background: rgba(255,255,255,0.2);
-    color: var(--text);
-  }
-  .btn-sm.red {
-    color: var(--danger);
-    border-color: rgba(255,68,68,0.5);
-    background: rgba(255,68,68,0.1);
-  }
-  .btn-sm.red:hover {
-    background: rgba(255,68,68,0.2);
-    color: var(--text);
-  }
-  .animal-list {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    height: 240px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--neon) transparent;
-  }
+  .btn-sm:hover { background: rgba(255,30,30,0.22); }
+  .btn-sm.red { color: var(--danger); border-color: rgba(255,68,68,0.5); background: rgba(255,68,68,0.1); }
+  .btn-sm.red:hover { background: rgba(255,68,68,0.2); }
+  .animal-list { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; height: 240px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--neon) transparent; }
   .animal-list::-webkit-scrollbar { width: 4px; }
-  .animal-list::-webkit-scrollbar-thumb {
-    background: var(--neon);
-    border-radius: 4px;
-  }
-  .a-item {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.48rem 0.9rem;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-    transition: background 0.12s;
-    user-select: none;
-  }
+  .animal-list::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 4px; }
+  .a-item { display: flex; align-items: center; gap: 0.65rem; padding: 0.48rem 0.9rem; cursor: pointer; border-bottom: 1px solid rgba(255,30,30,0.05); transition: background 0.12s; user-select: none; }
   .a-item:last-child { border-bottom: none; }
-  .a-item:hover { background: rgba(255,255,255,0.05); }
-  .a-item.on { background: rgba(255,255,255,0.1); }
+  .a-item:hover { background: rgba(255,30,30,0.06); }
+  .a-item.on { background: rgba(255,30,30,0.12); }
   .a-item input[type="checkbox"] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 13px;
-    height: 13px;
-    border: 1px solid var(--neon);
-    border-radius: 3px;
-    background: var(--surface);
-    cursor: pointer;
-    flex-shrink: 0;
-    position: relative;
-    outline: none;
+    -webkit-appearance: none; appearance: none;
+    width: 13px; height: 13px;
+    border: 1px solid var(--neon); border-radius: 3px;
+    background: var(--surface); cursor: pointer;
+    flex-shrink: 0; position: relative; outline: none;
     transition: background 0.2s, border-color 0.2s;
   }
-  .a-item input[type="checkbox"]:checked {
-    background: var(--neon);
-    border-color: var(--neon);
-    box-shadow: var(--neon-glow);
-  }
-  .a-item input[type="checkbox"]:checked::after {
-    content: '\\2713';
-    position: absolute;
-    color: black;
-    font-size: 8px;
-    font-weight: bold;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-55%);
-  }
-  .a-name {
-    font-size: 0.88rem;
-    line-height: 1.2;
-    flex: 1;
-    color: var(--text);
-  }
-  .a-meta {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--muted);
-    text-align: right;
-    min-width: 90px;
-  }
-  .badge-og {
-    font-size: 10px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: rgba(255,255,255,0.1);
-    color: var(--neon);
-    border: 1px solid var(--neon);
-    margin-left: 8px;
-    cursor: default;
-    text-shadow: var(--neon-glow);
-  }
-  .badge-secret {
-    font-size: 10px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: rgba(255,255,255,0.05);
-    color: var(--text);
-    border: 1px solid rgba(255,255,255,0.2);
-    margin-left: 8px;
-    cursor: default;
-  }
-  .meta-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.6rem;
-  }
-  .sel-count {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-  }
+  .a-item input[type="checkbox"]:checked { background: var(--neon); border-color: var(--neon); box-shadow: var(--neon-glow); }
+  .a-item input[type="checkbox"]:checked::after { content: '\2713'; position: absolute; color: black; font-size: 8px; font-weight: bold; top: 50%; left: 50%; transform: translate(-50%,-55%); }
+  .a-name { font-size: 0.88rem; line-height: 1.2; flex: 1; color: var(--text); }
+  .a-meta { font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; color: var(--muted); text-align: right; min-width: 90px; }
+  .badge-og { font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; padding: 2px 6px; border-radius: 4px; background: rgba(255,30,30,0.15); color: var(--neon); border: 1px solid var(--neon); margin-left: 8px; cursor: default; text-shadow: var(--neon-glow); }
+  .badge-secret { font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid rgba(255,255,255,0.2); margin-left: 8px; cursor: default; }
+  .meta-row { display: flex; justify-content: space-between; align-items: center; margin-top: 0.6rem; }
+  .sel-count { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--muted); }
   .sel-count span { color: var(--neon); }
-  .txt {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.72rem 1rem;
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.88rem;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .txt:focus {
-    border-color: var(--neon);
-    box-shadow: 0 0 10px rgba(255,255,255,0.5);
-  }
+  .txt { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.72rem 1rem; color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 0.88rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+  .txt:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(255,30,30,0.3); }
   .txt::placeholder { color: var(--muted); }
-  .hint {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.67rem;
-    color: var(--muted);
-    margin-top: 0.4rem;
-  }
+  .hint { font-family: 'Share Tech Mono', monospace; font-size: 0.67rem; color: var(--muted); margin-top: 0.4rem; }
   .error { color: var(--danger) !important; font-weight: bold; }
   .btn-gen {
-    display: block;
-    width: 100%;
-    padding: 0.92rem;
+    display: block; width: 100%; padding: 0.92rem;
+    background: var(--neon); border: none; border-radius: 10px;
+    color: black; font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+    box-shadow: var(--neon-glow); margin-bottom: 1.2rem;
+  }
+  .btn-gen:hover { box-shadow: 0 0 20px rgba(255,30,30,0.7); transform: translateY(-1px); }
+  .btn-gen:active { transform: none; }
+  .out-ph { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.25rem; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .out-ph-title { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--neon); text-shadow: var(--neon-glow); }
+  .btn-copy { margin-left: auto; padding: 0.26rem 0.7rem; background: rgba(255,30,30,0.1); border: 1px solid var(--neon); border-radius: 6px; color: var(--neon); font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; text-shadow: var(--neon-glow); }
+  .btn-copy:hover { background: rgba(255,30,30,0.22); }
+  .btn-copy.ok { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.1); }
+  .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; font-family: 'Share Tech Mono', monospace; font-size: 0.79rem; line-height: 1.8; color: var(--text); min-height: 120px; max-height: 480px; overflow-y: auto; white-space: pre; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .code-block.empty { color: var(--muted); font-style: italic; white-space: pre-wrap; }
+  .admin-mode-selector { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .admin-mode-btn { flex: 1; min-width: 80px; padding: 0.5rem; background: rgba(255,30,30,0.08); border: 1px solid var(--neon); border-radius: 7px; color: var(--neon); font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s; text-shadow: var(--neon-glow); }
+  .admin-mode-btn.active { background: var(--neon); color: black; border-color: var(--neon); box-shadow: var(--neon-glow); }
+  .admin-mode-btn:hover:not(.active) { background: rgba(255,30,30,0.2); }
+  #customAdminInput { display: none; margin-top: 1rem; }
+  #customBrainrotInput { display: flex; gap: 0.5rem; margin-top: 1rem; }
+  #customBrainrotInput input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 0.55rem 0.85rem; color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 0.82rem; outline: none; }
+  #customBrainrotInput button { padding: 0.5rem 0.9rem; background: rgba(255,30,30,0.1); border: 1px solid var(--neon); border-radius: 7px; color: var(--neon); font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; text-transform: uppercase; cursor: pointer; white-space: nowrap; text-shadow: var(--neon-glow); }
+  #pasteCustomListContainer { margin-top: 1rem; }
+  #pasteCustomListContainer textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.72rem 1rem; color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 0.88rem; min-height: 100px; resize: vertical; outline: none; transition: border-color 0.2s; }
+  #pasteCustomListContainer textarea:focus { border-color: var(--neon); }
+  #pasteCustomListContainer button { margin-top: 0.5rem; padding: 0.5rem 0.9rem; background: rgba(255,30,30,0.1); border: 1px solid var(--neon); border-radius: 7px; color: var(--neon); font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; text-transform: uppercase; cursor: pointer; white-space: nowrap; text-shadow: var(--neon-glow); }
+  .gag2-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+  .gag2-ph { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.25rem; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .gag2-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--neon); box-shadow: var(--neon-glow); }
+  .gag2-ph-title { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--neon); text-shadow: var(--neon-glow); }
+  .gag2-pb { padding: 1.25rem; }
+  .gag2-lbl { display: block; font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; text-transform: uppercase; color: var(--muted); margin-bottom: 0.45rem; }
+  .gag2-f-field { position: relative; margin-bottom: 1.1rem; }
+  .gag2-f-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.95rem; color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 0.88rem; outline: none; }
+  .gag2-f-input:focus { border-color: var(--neon); box-shadow: 0 0 12px rgba(255,30,30,0.2); }
+  .gag2-f-hint { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; color: var(--muted); margin-top: 0.35rem; display: block; }
+  .gag2-f-hint.error { color: var(--danger); }
+  .gag2-admin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.75rem; }
+  .gag2-admin-mode-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 0.55rem; color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; text-transform: uppercase; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .gag2-admin-mode-btn.active { background: rgba(255,30,30,0.08); border-color: var(--neon); color: var(--neon); text-shadow: var(--neon-glow); }
+  .gag2-btn-gen { width: 100%; padding: 0.85rem; background: var(--neon); border: none; border-radius: 9px; color: black; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; cursor: pointer; box-shadow: var(--neon-glow); transition: all 0.2s; }
+  .gag2-btn-gen:hover { box-shadow: 0 0 20px rgba(255,30,30,0.7); transform: translateY(-1px); }
+  .gag2-output-container { position: relative; margin-top: 1.2rem; }
+  .gag2-code-block { background: #0a0000; border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; font-family: 'Share Tech Mono', monospace; font-size: 0.78rem; color: var(--neon); white-space: pre-wrap; word-break: break-all; min-height: 54px; }
+  .gag2-code-block.empty { color: var(--muted); font-style: italic; text-align: center; }
+  .gag2-btn-copy { position: absolute; top: 8px; right: 8px; padding: 0.3rem 0.65rem; background: rgba(0,0,0,0.6); border: 1px solid var(--border); border-radius: 5px; color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .gag2-btn-copy.ok { border-color: var(--green); color: var(--green); }
+  #gag2-usernameSuggestions, #usernameSuggestions { position: absolute; bottom: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 100; display: none; }
+  .gag2-suggestion-item, .suggestion-item { padding: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.02); transition: background 0.12s; }
+  .gag2-suggestion-item:hover, .suggestion-item:hover { background: rgba(255,30,30,0.06); }
+  .gag2-suggestion-avatar, .suggestion-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: #1a0000; }
+  .gag2-suggestion-avatar img, .suggestion-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .gag2-suggestion-info, .suggestion-info { flex: 1; }
+  .gag2-suggestion-username, .suggestion-username { font-size: 0.85rem; font-weight: 600; color: #fff; }
+  .gag2-suggestion-handle, .suggestion-handle { font-size: 0.75rem; color: var(--neon); }
+  .suggestion-id { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+
+  /* ═══ LIVE CHAT ═══ */
+  .chat-toggle {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 52px; height: 52px;
     background: var(--neon);
     border: none;
-    border-radius: 10px;
-    color: black;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    border-radius: 50%;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: var(--neon-glow);
-    margin-bottom: 1.2rem;
-  }
-  .btn-gen:hover {
-    box-shadow: 0 0 20px rgba(255,255,255,0.7);
-    transform: translateY(-1px);
-  }
-  .btn-gen:active { transform: none; }
-  .out-ph {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.75rem 1.25rem;
+    justify-content: center;
+    font-size: 1.3rem;
+    z-index: 800;
+    box-shadow: var(--neon-glow), 0 4px 15px rgba(0,0,0,0.4);
+    transition: transform 0.2s;
+  }
+  .chat-toggle:hover { transform: scale(1.1); }
+  .chat-unread {
+    position: absolute;
+    top: -2px; right: -2px;
+    width: 18px; height: 18px;
+    background: #ff4444;
+    border-radius: 50%;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+  }
+  .chat-panel {
+    position: fixed;
+    bottom: 5.5rem;
+    right: 1.5rem;
+    width: 340px;
+    height: 440px;
+    background: var(--panel);
+    border: 1px solid var(--neon);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    z-index: 800;
+    box-shadow: 0 0 30px rgba(255,30,30,0.2), 0 8px 30px rgba(0,0,0,0.5);
+    animation: fadeUp 0.25s ease both;
+    overflow: hidden;
+  }
+  .chat-panel.hidden { display: none; }
+  .chat-header {
+    padding: 0.75rem 1rem;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
-  .out-ph-title {
+  .chat-header-title {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.12em;
     color: var(--neon);
     text-shadow: var(--neon-glow);
+    flex: 1;
   }
-  .btn-copy {
-    margin-left: auto;
-    padding: 0.26rem 0.7rem;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid var(--neon);
-    border-radius: 6px;
-    color: var(--neon);
+  .chat-online {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-shadow: var(--neon-glow);
-  }
-  .btn-copy:hover { background: rgba(255,255,255,0.2); }
-  .btn-copy.ok {
+    font-size: 0.62rem;
     color: var(--green);
-    border-color: var(--green);
-    background: rgba(0,255,136,0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
   }
-  .code-block {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1rem 1.2rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.79rem;
-    line-height: 1.8;
-    color: var(--text);
-    min-height: 120px;
-    max-height: 480px;
+  .chat-online-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: blink 2s infinite;
+  }
+  .chat-messages {
+    flex: 1;
     overflow-y: auto;
-    white-space: pre;
-    overflow-x: auto;
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
-  .code-block.empty {
-    color: var(--muted);
-    font-style: italic;
-    white-space: pre-wrap;
-  }
-  .admin-mode-selector {
+  .chat-messages::-webkit-scrollbar { width: 3px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .chat-msg {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    align-items: flex-start;
+  }
+  .chat-msg-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .chat-msg-body { flex: 1; min-width: 0; }
+  .chat-msg-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.2rem;
     flex-wrap: wrap;
   }
-  .admin-mode-btn {
-    flex: 1;
-    min-width: 80px;
-    padding: 0.5rem;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid var(--neon);
-    border-radius: 7px;
-    color: var(--neon);
+  .chat-msg-name {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: var(--neon);
+  }
+  .chat-role-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    padding: 1px 4px;
+    border-radius: 3px;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-shadow: var(--neon-glow);
+    letter-spacing: 0.04em;
+    font-weight: bold;
+    flex-shrink: 0;
   }
-  .admin-mode-btn.active {
-    background: var(--neon);
-    color: black;
-    border-color: var(--neon);
-    box-shadow: var(--neon-glow);
+  .chat-msg-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text);
+    line-height: 1.4;
+    word-break: break-word;
   }
-  .admin-mode-btn:hover:not(.active) {
-    background: rgba(255,255,255,0.2);
+  .chat-msg-time {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    margin-top: 0.1rem;
   }
-  #customAdminInput {
-    display: none;
-    margin-top: 1rem;
+  .chat-system-msg {
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    font-style: italic;
   }
-  #customBrainrotInput {
+  .chat-input-area {
+    padding: 0.7rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
     display: flex;
     gap: 0.5rem;
-    margin-top: 1rem;
   }
-  #customBrainrotInput input {
+  .chat-input {
     flex: 1;
-    background: var(--surface);
+    background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 7px;
-    padding: 0.55rem 0.85rem;
+    padding: 0.4rem 0.7rem;
     color: var(--text);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.82rem;
-    outline: none;
-  }
-  #customBrainrotInput button {
-    padding: 0.5rem 0.9rem;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid var(--neon);
-    border-radius: 7px;
-    color: var(--neon);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    cursor: pointer;
-    white-space: nowrap;
-    text-shadow: var(--neon-glow);
-  }
-  #pasteCustomListContainer {
-    margin-top: 1rem;
-  }
-  #pasteCustomListContainer textarea {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.72rem 1rem;
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.88rem;
-    min-height: 100px;
-    resize: vertical;
+    font-size: 0.75rem;
     outline: none;
     transition: border-color 0.2s;
   }
-  #pasteCustomListContainer textarea:focus {
-    border-color: var(--neon);
-  }
-  #pasteCustomListContainer button {
-    margin-top: 0.5rem;
-    padding: 0.5rem 0.9rem;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid var(--neon);
+  .chat-input:focus { border-color: var(--neon); }
+  .chat-input::placeholder { color: var(--muted); }
+  .chat-send {
+    padding: 0.4rem 0.7rem;
+    background: var(--neon);
+    border: none;
     border-radius: 7px;
-    color: var(--neon);
+    color: black;
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.68rem;
     text-transform: uppercase;
     cursor: pointer;
+    font-weight: bold;
+    transition: opacity 0.2s;
     white-space: nowrap;
-    text-shadow: var(--neon-glow);
   }
-  .gag2-panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 1.2rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    position: relative;
+  .chat-send:hover { opacity: 0.85; }
+  .chat-login-prompt {
+    padding: 0.7rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
   }
-  .gag2-panel::before {
-    content: "🍃";
-    position: absolute;
-    top: -10px;
-    left: 10px;
-    font-size: 1.2rem;
-    opacity: 0.6;
-    pointer-events: none;
+  .chat-login-prompt button {
+    margin-top: 0.4rem;
+    padding: 0.35rem 0.8rem;
+    background: var(--discord);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
   }
-  .gag2-panel::after {
-    content: "🌿";
-    position: absolute;
-    top: -10px;
-    right: 10px;
-    font-size: 1.2rem;
-    opacity: 0.6;
-    pointer-events: none;
+
+  /* ═══ TOP HITTERS ═══ */
+  .top-hitters-section {
+    margin-top: 2.5rem;
+    width: 100%;
+    max-width: 680px;
+    animation: fadeUp 0.6s ease both 0.4s both;
   }
-  .gag2-ph {
+  .top-hitters-header {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.75rem 1.25rem;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+    justify-content: center;
   }
-  .gag2-dot {
-    width: 7px;
-    height: 7px;
+  .top-hitters-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--neon);
+    text-shadow: var(--neon-glow);
+  }
+  .top-hitters-cards {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hitter-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 1rem;
+    width: 180px;
+    text-align: center;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+  }
+  .hitter-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--rank-color, var(--neon)), transparent);
+  }
+  .hitter-card:hover { transform: translateY(-3px); box-shadow: 0 0 20px rgba(255,30,30,0.15); }
+  .hitter-rank {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.6rem;
+  }
+  .hitter-avatar {
+    width: 48px; height: 48px;
     border-radius: 50%;
-    background: var(--neon);
-    box-shadow: var(--neon-glow);
+    object-fit: cover;
+    border: 2px solid var(--rank-color, var(--border));
+    margin: 0 auto 0.6rem;
+    display: block;
+    background: var(--surface);
   }
-  .gag2-ph-title {
+  .hitter-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hitter-handle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+  .hitter-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--rank-color, var(--neon));
+    text-shadow: 0 0 8px var(--rank-color, var(--neon));
+  }
+  .hitter-count-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .hitter-empty {
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    padding: 1.5rem 0 0.5rem;
+    font-style: italic;
+  }
+  .hitter-card.rank-1 { --rank-color: #ffd700; border-color: #ffd70044; }
+  .hitter-card.rank-2 { --rank-color: #c0c0c0; border-color: #c0c0c044; }
+  .hitter-card.rank-3 { --rank-color: #cd7f32; border-color: #cd7f3244; }
+  .rank-1 .hitter-rank { color: #ffd700; text-shadow: 0 0 12px #ffd700; }
+  .rank-2 .hitter-rank { color: #c0c0c0; text-shadow: 0 0 12px #c0c0c0; }
+  .rank-3 .hitter-rank { color: #cd7f32; text-shadow: 0 0 12px #cd7f32; }
+
+  /* ═══ SERVER GATE MODAL ═══ */
+  .server-gate-box {
+    background: var(--panel);
+    border: 1px solid var(--neon);
+    border-radius: 14px;
+    padding: 2.5rem 2rem;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255,30,30,0.25);
+    animation: fadeUp 0.3s ease both;
+  }
+  .server-gate-box .gate-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  .server-gate-box h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--neon);
+    text-shadow: var(--neon-glow);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .server-gate-box p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .server-gate-box .btn-join {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.4rem;
+    background: var(--discord);
+    border: none;
+    border-radius: 9px;
+    color: white;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+    box-shadow: 0 0 14px rgba(88,101,242,0.4);
+    margin-bottom: 0.7rem;
+  }
+  .server-gate-box .btn-join:hover { background: #4752c4; }
+  .server-gate-box .btn-retry {
+    display: block;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255,30,30,0.1);
+    border: 1px solid var(--neon);
+    border-radius: 8px;
+    color: var(--neon);
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--neon);
+    cursor: pointer;
+    transition: background 0.2s;
     text-shadow: var(--neon-glow);
-  }
-  .gag2-pb { padding: 1.25rem; }
-  .gag2-lbl {
-    display: block;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.45rem;
-  }
-  .gag2-f-field { position: relative; margin-bottom: 1.1rem; }
-  .gag2-f-input {
     width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.65rem 0.95rem;
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.88rem;
-    outline: none;
   }
-  .gag2-f-input:focus {
-    border-color: var(--neon);
-    box-shadow: 0 0 12px rgba(255,255,255,0.15);
-  }
-  .gag2-f-hint {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.62rem;
-    color: #557755;
-    margin-top: 0.35rem;
-    display: block;
-  }
-  .gag2-f-hint.error { color: var(--danger); }
-  .gag2-admin-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-  }
-  .gag2-admin-mode-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    padding: 0.55rem;
-    color: var(--muted);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    cursor: pointer;
-    text-align: center;
-  }
-  .gag2-admin-mode-btn.active {
-    background: rgba(255,255,255,0.05);
-    border-color: var(--neon);
-    color: var(--neon);
-    text-shadow: var(--neon-glow);
-  }
-  .gag2-btn-gen {
-    width: 100%;
-    padding: 0.85rem;
-    background: var(--neon);
-    border: none;
-    border-radius: 9px;
-    color: black;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    cursor: pointer;
-    box-shadow: var(--neon-glow);
-  }
-  .gag2-output-container { position: relative; margin-top: 1.2rem; }
-  .gag2-code-block {
-    background: #061006;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.2rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--green);
-    white-space: pre-wrap;
-    word-break: break-all;
-    min-height: 54px;
-  }
-  .gag2-code-block.empty {
-    color: #557755;
-    font-style: italic;
-    text-align: center;
-  }
-  .gag2-btn-copy {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    padding: 0.3rem 0.65rem;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    color: var(--muted);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.62rem;
-    text-transform: uppercase;
-    cursor: pointer;
-  }
-  .gag2-btn-copy.ok {
-    border-color: var(--green);
-    color: var(--green);
-  }
-  #gag2-usernameSuggestions {
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    right: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 100;
-    display: none;
-  }
-  .gag2-suggestion-item {
-    padding: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.02);
-  }
-  .gag2-suggestion-item:hover {
-    background: rgba(255,255,255,0.05);
-  }
-  .gag2-suggestion-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: #222;
-  }
-  .gag2-suggestion-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .gag2-suggestion-info { flex: 1; }
-  .gag2-suggestion-username {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #fff;
-  }
-  .gag2-suggestion-handle {
-    font-size: 0.75rem;
-    color: var(--neon);
-  }
-  #usernameSuggestions {
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    right: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 100;
-    display: none;
-  }
-  .suggestion-item {
-    padding: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.02);
-  }
-  .suggestion-item:hover {
-    background: rgba(255,255,255,0.05);
-  }
-  .suggestion-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: #222;
-  }
-  .suggestion-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .suggestion-info { flex: 1; }
-  .suggestion-username {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #fff;
-  }
-  .suggestion-handle {
-    font-size: 0.75rem;
-    color: var(--neon);
-  }
-  .suggestion-id {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-  }
+  .server-gate-box .btn-retry:hover { background: rgba(255,30,30,0.22); }
+
   @media (max-width: 600px) {
     .tool-selector { flex-direction: column; }
     .tool-card { width: 90%; }
     .gag2-admin-grid { grid-template-columns: 1fr; }
     .tool-icon { height: 60px; }
+    .chat-panel { width: calc(100vw - 3rem); right: 1rem; }
+    .top-hitters-cards { gap: 0.6rem; }
+    .hitter-card { width: 140px; }
   }
 </style>
 </head>
 <body>
+
+<!-- ═══ TOP BAR ═══ -->
+<div class="top-bar">
+  <!-- Scripts Counter (top left) -->
+  <div class="counter-widget">
+    <div class="counter-dot"></div>
+    <span>Scripts Generated:</span>
+    <span class="counter-num" id="counterNum">0</span>
+  </div>
+
+  <!-- Login Area (top right) -->
+  <div class="login-area">
+    <button class="btn-discord" id="loginBtn" onclick="loginWithDiscord()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.101 18.08.114 18.1.13 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      Sign in with Discord
+    </button>
+    <div class="user-chip" id="userChip">
+      <img class="user-avatar" id="userAvatar" src="" alt="">
+      <span class="user-name" id="userNameDisplay"></span>
+      <span class="user-role-badge" id="topRoleBadge" style="display:none"></span>
+      <button class="btn-admin" id="adminOpenBtn" onclick="openAdmin()">⚙ Admin</button>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SERVER GATE MODAL ═══ -->
+<div class="modal-overlay hidden" id="serverGateModal">
+  <div class="server-gate-box">
+    <div class="gate-icon">🔒</div>
+    <h2>Members Only</h2>
+    <p>You must be in the <strong style="color:var(--neon)">ExeHub</strong> Discord server to use this site.<br>Join the server, then sign in again.</p>
+    <a class="btn-join" href="https://discord.gg/dSjhj8Usjg" target="_blank">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.101 18.08.114 18.1.13 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.030z"/></svg>
+      Join ExeHub Server
+    </a>
+    <button class="btn-retry" onclick="closeModal('serverGateModal'); loginWithDiscord()">↺ Already joined? Sign in again</button>
+  </div>
+</div>
+
+<!-- ═══ LOGIN REQUIRED MODAL ═══ -->
+<div class="modal-overlay hidden" id="loginModal">
+  <div class="modal-box">
+    <h2>Sign In Required</h2>
+    <p>You must sign in with Discord before generating scripts. This helps us track who's using EXE HUB.</p>
+    <div class="modal-btns">
+      <button class="btn-discord" onclick="loginWithDiscord()">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.101 18.08.114 18.1.13 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        Sign in with Discord
+      </button>
+      <button class="btn-cancel" onclick="closeModal('loginModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PANEL MODAL ═══ -->
+<div class="modal-overlay hidden" id="adminModal">
+  <div class="admin-modal-box">
+    <div class="admin-header">
+      <h2>⚙ Admin Panel</h2>
+      <button class="admin-close" onclick="closeModal('adminModal')">✕</button>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('roles', this)">Roles</button>
+      <button class="admin-tab" onclick="switchAdminTab('users', this)">Users</button>
+    </div>
+    <div class="admin-body">
+      <!-- ROLES TAB -->
+      <div class="admin-tab-pane active" id="adminTab-roles">
+        <p class="admin-section-title">Create a new role</p>
+        <div class="role-form">
+          <input class="role-name-input" id="newRoleName" type="text" placeholder="Role name (e.g. VIP, Moderator)">
+          <input class="role-color-input" id="newRoleColor" type="color" value="#ff1e1e" title="Pick a color">
+          <button class="btn-add-role" onclick="addRole()">+ Add Role</button>
+        </div>
+        <p class="admin-section-title">Existing roles</p>
+        <div class="roles-list" id="rolesList"></div>
+      </div>
+      <!-- USERS TAB -->
+      <div class="admin-tab-pane" id="adminTab-users">
+        <p class="admin-section-title">Users who have signed in</p>
+        <div id="usersList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HOME SCREEN ═══ -->
 <div id="homeScreen" class="home-screen">
   <h1 class="home-title">EXE HUB</h1>
   <h1 class="home-subtitle">LOGGER</h1>
@@ -932,9 +1254,26 @@
       <div class="tool-desc">Grow A Garden 2 Stealer with custom GUI options</div>
     </div>
   </div>
+
+  <!-- TOP HITTERS -->
+  <div class="top-hitters-section">
+    <div class="top-hitters-header">
+      <div class="dot dot-cyan"></div>
+      <span class="top-hitters-title">⚡ Top Hitters</span>
+      <div class="dot dot-cyan"></div>
+    </div>
+    <div class="top-hitters-cards" id="topHittersCards">
+      <!-- rendered by JS -->
+    </div>
+  </div>
 </div>
+
+<!-- ═══ BACK BUTTON ═══ -->
 <a href="#" class="back-button" onclick="backToHome()" style="display: none;" id="backButton">← BACK</a>
+
+<!-- ═══ TOOL CONTENT ═══ -->
 <div id="mainContent" style="display: none;">
+  <!-- BRAINROT TOOL -->
   <div id="brainrotContent" class="content-area">
     <div class="tool-wrapper">
       <header class="tool-header">
@@ -956,8 +1295,8 @@
           </div>
           <div id="pasteCustomListContainer">
             <textarea id="pasteCustomListTextarea" placeholder="Paste your custom list here, e.g.:
-[\"Meowl\"] = true,
-[\"Skibidi Toilet\"] = true,"></textarea>
+[&quot;Meowl&quot;] = true,
+[&quot;Skibidi Toilet&quot;] = true,"></textarea>
             <button onclick="parsePastedList()">Paste Custom List</button>
           </div>
           <div class="meta-row">
@@ -1013,6 +1352,8 @@
       </div>
     </div>
   </div>
+
+  <!-- GAG2 TOOL -->
   <div id="gag2Content" class="content-area">
     <div class="tool-wrapper">
       <header class="tool-header">
@@ -1060,15 +1401,561 @@
     </div>
   </div>
 </div>
+
+<!-- ═══ LIVE CHAT ═══ -->
+<button class="chat-toggle" id="chatToggle" onclick="toggleChat()">
+  💬
+  <span class="chat-unread" id="chatUnread">0</span>
+</button>
+<div class="chat-panel hidden" id="chatPanel">
+  <div class="chat-header">
+    <div class="dot dot-green" style="width:6px;height:6px;"></div>
+    <span class="chat-header-title">Live Chat</span>
+    <span class="chat-online"><span class="chat-online-dot"></span>Live</span>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-system-msg">— Chat started. Say hello! —</div>
+  </div>
+  <div id="chatInputArea" class="chat-input-area" style="display:none">
+    <input class="chat-input" id="chatInput" type="text" placeholder="Type a message..." maxlength="200" onkeydown="if(event.key==='Enter') sendChatMessage()">
+    <button class="chat-send" onclick="sendChatMessage()">Send</button>
+  </div>
+  <div id="chatLoginPrompt" class="chat-login-prompt">
+    Sign in to chat
+    <br>
+    <button onclick="loginWithDiscord()">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.101 18.08.114 18.1.13 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.030z"/></svg>
+      Sign in with Discord
+    </button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
+
 <script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CONFIG — set your Discord Client ID here
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const DISCORD_CLIENT_ID = '1368253122299822292';
+const DISCORD_REDIRECT_URI = window.location.origin + window.location.pathname;
+const REQUIRED_GUILD_ID = '1444074117937762480'; // ExeHub server
+
+// Admin Discord usernames and their titles
+const ADMIN_MAP = {
+  'bythbzen':    { title: 'Founder', color: '#ff1e1e' },
+  'visualcoder': { title: 'Owner',   color: '#ff6600' },
+  'levraimlk':  { title: 'Developer', color: '#5865F2' }
+};
+
 const SKRINHUB_API = 'https://c58175c8-ffbe-4518-9a89-8456b2c912f0-00-3jhjthxjlcyh1.sisko.replit.dev';
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  STATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let currentTool = null;
 let selected = new Set();
 let adminMode = 'no-gui';
 let customAdminLoadstring = '';
 let gag2AdminMode = 'no-gui';
 let gag2CustomAdminLoadstring = '';
+let chatOpen = false;
+let chatUnreadCount = 0;
+let currentUser = null;
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SCRIPTS COUNTER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getScriptCount() { return parseInt(localStorage.getItem('exehub_scripts_count') || '0'); }
+function incrementScriptCount() {
+  const n = getScriptCount() + 1;
+  localStorage.setItem('exehub_scripts_count', n);
+  document.getElementById('counterNum').textContent = n;
+  // Track per-user hit count
+  if (currentUser) {
+    const hitters = getTopHitters();
+    const key = currentUser.username;
+    if (!hitters[key]) {
+      hitters[key] = { username: currentUser.username, display_name: currentUser.global_name || currentUser.username, avatar: currentUser.avatar, count: 0 };
+    }
+    hitters[key].count++;
+    hitters[key].display_name = currentUser.global_name || currentUser.username;
+    hitters[key].avatar = currentUser.avatar;
+    saveTopHitters(hitters);
+    renderTopHitters();
+  }
+}
+function initCounter() { document.getElementById('counterNum').textContent = getScriptCount(); }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  TOP HITTERS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getTopHitters() { try { return JSON.parse(localStorage.getItem('exehub_top_hitters') || '{}'); } catch { return {}; } }
+function saveTopHitters(h) { localStorage.setItem('exehub_top_hitters', JSON.stringify(h)); }
+
+function renderTopHitters() {
+  const container = document.getElementById('topHittersCards');
+  if (!container) return;
+  const hitters = getTopHitters();
+  const sorted = Object.values(hitters).sort((a, b) => b.count - a.count).slice(0, 3);
+  const rankEmojis = ['🥇', '🥈', '🥉'];
+  const rankClasses = ['rank-1', 'rank-2', 'rank-3'];
+  const rankLabels = ['#1', '#2', '#3'];
+
+  if (!sorted.length) {
+    container.innerHTML = '<p class="hitter-empty">No scripts generated yet. Be the first top hitter!</p>';
+    return;
+  }
+
+  container.innerHTML = sorted.map((h, i) => `
+    <div class="hitter-card ${rankClasses[i]}">
+      <div class="hitter-rank">${rankEmojis[i]}</div>
+      <img class="hitter-avatar" src="${h.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" alt="">
+      <div class="hitter-name">${escHtml(h.display_name)}</div>
+      <div class="hitter-handle">@${escHtml(h.username)}</div>
+      <div class="hitter-count">${h.count.toLocaleString()}</div>
+      <div class="hitter-count-label">scripts executed</div>
+    </div>
+  `).join('');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  DISCORD OAUTH2 (Implicit flow — client-side only)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function loginWithDiscord() {
+  const params = new URLSearchParams({
+    client_id: DISCORD_CLIENT_ID,
+    redirect_uri: DISCORD_REDIRECT_URI,
+    response_type: 'token',
+    scope: 'identify guilds'
+  });
+  window.location.href = `https://discord.com/oauth2/authorize?${params}`;
+}
+
+async function handleDiscordCallback() {
+  const hash = window.location.hash.substring(1);
+  if (!hash.includes('access_token')) return;
+  const params = new URLSearchParams(hash);
+  const token = params.get('access_token');
+  if (!token) return;
+
+  // Clean the URL hash
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+
+  try {
+    // Fetch user profile and guilds in parallel
+    const [userRes, guildsRes] = await Promise.all([
+      fetch('https://discord.com/api/users/@me', { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch('https://discord.com/api/users/@me/guilds', { headers: { 'Authorization': `Bearer ${token}` } })
+    ]);
+    if (!userRes.ok) throw new Error('Discord API error');
+    const user = await userRes.json();
+
+    // Verify server membership
+    let inServer = false;
+    if (guildsRes.ok) {
+      const guilds = await guildsRes.json();
+      inServer = Array.isArray(guilds) && guilds.some(g => g.id === REQUIRED_GUILD_ID);
+    }
+    if (!inServer) {
+      showServerGate();
+      return;
+    }
+
+    const userData = {
+      id: user.id,
+      username: user.username,
+      global_name: user.global_name || user.username,
+      avatar: user.avatar
+        ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
+        : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.id) % 5}.png`,
+      token
+    };
+    localStorage.setItem('exehub_discord_user', JSON.stringify(userData));
+    trackKnownUser(userData);
+    setCurrentUser(userData);
+    showToast('✅ Signed in as ' + userData.global_name, 'success');
+  } catch (e) {
+    showToast('❌ Failed to verify Discord profile.', 'error');
+  }
+}
+
+function showServerGate() {
+  document.getElementById('serverGateModal').classList.remove('hidden');
+}
+
+function loadStoredUser() {
+  const stored = localStorage.getItem('exehub_discord_user');
+  if (stored) {
+    try { setCurrentUser(JSON.parse(stored)); } catch {}
+  }
+}
+
+function setCurrentUser(user) {
+  currentUser = user;
+  // Update top bar
+  const chip = document.getElementById('userChip');
+  chip.classList.add('show');
+  document.getElementById('loginBtn').style.display = 'none';
+  document.getElementById('userAvatar').src = user.avatar;
+  document.getElementById('userNameDisplay').textContent = user.global_name || user.username;
+
+  // Check admin
+  const adminEntry = ADMIN_MAP[user.username];
+  const adminBtn = document.getElementById('adminOpenBtn');
+  if (adminEntry) {
+    adminBtn.classList.add('show');
+  }
+
+  // Show their role badge in top bar
+  applyUserRoleBadge(user.username);
+
+  // Update chat input
+  document.getElementById('chatInputArea').style.display = 'flex';
+  document.getElementById('chatLoginPrompt').style.display = 'none';
+}
+
+function applyUserRoleBadge(username) {
+  const topBadge = document.getElementById('topRoleBadge');
+  // Admin built-in badge
+  if (ADMIN_MAP[username]) {
+    const a = ADMIN_MAP[username];
+    topBadge.textContent = a.title;
+    topBadge.style.background = a.color + '33';
+    topBadge.style.color = a.color;
+    topBadge.style.border = `1px solid ${a.color}66`;
+    topBadge.style.display = 'inline';
+    return;
+  }
+  // Assigned role from admin panel
+  const userRoles = getUserRoles();
+  const roleId = userRoles[username];
+  if (roleId) {
+    const roles = getRoles();
+    const role = roles.find(r => r.id === roleId);
+    if (role) {
+      topBadge.textContent = role.name;
+      topBadge.style.background = role.color + '33';
+      topBadge.style.color = role.color;
+      topBadge.style.border = `1px solid ${role.color}66`;
+      topBadge.style.display = 'inline';
+      return;
+    }
+  }
+  topBadge.style.display = 'none';
+}
+
+function logout() {
+  localStorage.removeItem('exehub_discord_user');
+  currentUser = null;
+  document.getElementById('userChip').classList.remove('show');
+  document.getElementById('loginBtn').style.display = 'flex';
+  document.getElementById('adminOpenBtn').classList.remove('show');
+  document.getElementById('chatInputArea').style.display = 'none';
+  document.getElementById('chatLoginPrompt').style.display = 'block';
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ADMIN PANEL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getRoles() { try { return JSON.parse(localStorage.getItem('exehub_roles') || '[]'); } catch { return []; } }
+function saveRoles(r) { localStorage.setItem('exehub_roles', JSON.stringify(r)); }
+function getUserRoles() { try { return JSON.parse(localStorage.getItem('exehub_user_roles') || '{}'); } catch { return {}; } }
+function saveUserRoles(r) { localStorage.setItem('exehub_user_roles', JSON.stringify(r)); }
+function getKnownUsers() { try { return JSON.parse(localStorage.getItem('exehub_known_users') || '[]'); } catch { return []; } }
+function saveKnownUsers(u) { localStorage.setItem('exehub_known_users', JSON.stringify(u)); }
+
+function trackKnownUser(user) {
+  const users = getKnownUsers();
+  const idx = users.findIndex(u => u.id === user.id);
+  const entry = { id: user.id, username: user.username, global_name: user.global_name, avatar: user.avatar };
+  if (idx >= 0) users[idx] = entry; else users.push(entry);
+  saveKnownUsers(users);
+}
+
+function openAdmin() {
+  if (!currentUser || !ADMIN_MAP[currentUser.username]) {
+    showToast('❌ Access denied.', 'error');
+    return;
+  }
+  renderRoles();
+  renderUsers();
+  document.getElementById('adminModal').classList.remove('hidden');
+}
+
+function switchAdminTab(tab, btn) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.admin-tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('adminTab-' + tab).classList.add('active');
+}
+
+function addRole() {
+  const name = document.getElementById('newRoleName').value.trim();
+  const color = document.getElementById('newRoleColor').value;
+  if (!name) { showToast('Enter a role name.', 'error'); return; }
+  const roles = getRoles();
+  if (roles.some(r => r.name.toLowerCase() === name.toLowerCase())) {
+    showToast('Role already exists.', 'error'); return;
+  }
+  roles.push({ id: Date.now().toString(), name, color });
+  saveRoles(roles);
+  document.getElementById('newRoleName').value = '';
+  renderRoles();
+  renderUsers(); // refresh selects
+  showToast('✅ Role "' + name + '" created.', 'success');
+}
+
+function deleteRole(id) {
+  let roles = getRoles().filter(r => r.id !== id);
+  saveRoles(roles);
+  // Remove from any user who had it
+  const ur = getUserRoles();
+  for (const u in ur) { if (ur[u] === id) delete ur[u]; }
+  saveUserRoles(ur);
+  renderRoles();
+  renderUsers();
+}
+
+function renderRoles() {
+  const list = document.getElementById('rolesList');
+  const roles = getRoles();
+  if (!roles.length) {
+    list.innerHTML = '<p class="admin-empty">No roles yet. Create one above.</p>';
+    return;
+  }
+  list.innerHTML = '';
+  roles.forEach(role => {
+    const row = document.createElement('div');
+    row.className = 'role-row';
+    row.innerHTML = `
+      <span class="role-color-dot" style="background:${role.color}"></span>
+      <span class="role-row-name">${escHtml(role.name)}</span>
+      <span class="user-role-badge" style="background:${role.color}33;color:${role.color};border:1px solid ${role.color}66">${escHtml(role.name)}</span>
+      <button class="btn-del-role" onclick="deleteRole('${role.id}')">Delete</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function renderUsers() {
+  const container = document.getElementById('usersList');
+  const users = getKnownUsers();
+  const roles = getRoles();
+  const userRoles = getUserRoles();
+
+  if (!users.length) {
+    container.innerHTML = '<p class="admin-empty">No users have signed in yet.</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+
+  // Built-in admin users first
+  const allUsers = [...users];
+
+  allUsers.forEach(user => {
+    const row = document.createElement('div');
+    row.className = 'user-rank-row';
+
+    // Build role select
+    let selectHtml = `<select class="role-select" id="rolesel-${user.id}">
+      <option value="">— No role —</option>`;
+    roles.forEach(r => {
+      const sel = userRoles[user.username] === r.id ? 'selected' : '';
+      selectHtml += `<option value="${r.id}" ${sel}>${escHtml(r.name)}</option>`;
+    });
+    selectHtml += '</select>';
+
+    // Admin badge if applicable
+    const adminEntry = ADMIN_MAP[user.username];
+    const adminBadge = adminEntry
+      ? `<span class="user-role-badge" style="background:${adminEntry.color}33;color:${adminEntry.color};border:1px solid ${adminEntry.color}66">${adminEntry.title}</span>`
+      : '';
+
+    row.innerHTML = `
+      <img class="user-rank-avatar" src="${user.avatar}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 24 24&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;12&quot; fill=&quot;%231a0000&quot;/></svg>'">
+      <span class="user-rank-name">${escHtml(user.global_name || user.username)}<br><span style="font-size:0.62rem;color:var(--muted)">@${escHtml(user.username)}</span></span>
+      ${adminBadge}
+      ${!adminEntry ? selectHtml : '<span style="font-family:Share Tech Mono,monospace;font-size:0.65rem;color:var(--muted)">Built-in admin</span>'}
+      ${!adminEntry ? `<button class="btn-assign-role" onclick="assignRole('${user.username}', '${user.id}')">Assign</button>` : ''}
+    `;
+    container.appendChild(row);
+  });
+}
+
+function assignRole(username, userId) {
+  const sel = document.getElementById('rolesel-' + userId);
+  const roleId = sel ? sel.value : '';
+  const ur = getUserRoles();
+  if (roleId) ur[username] = roleId; else delete ur[username];
+  saveUserRoles(ur);
+  showToast('✅ Role updated for @' + username, 'success');
+  // Refresh top bar if it's the current user
+  if (currentUser && currentUser.username === username) {
+    applyUserRoleBadge(username);
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  LIVE CHAT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getChatMessages() { try { return JSON.parse(localStorage.getItem('exehub_chat') || '[]'); } catch { return []; } }
+function saveChatMessages(m) { localStorage.setItem('exehub_chat', JSON.stringify(m.slice(-150))); }
+
+function getUserRoleBadgeHTML(username) {
+  const adminEntry = ADMIN_MAP[username];
+  if (adminEntry) {
+    return `<span class="chat-role-badge" style="background:${adminEntry.color}33;color:${adminEntry.color};border:1px solid ${adminEntry.color}55">${adminEntry.title}</span>`;
+  }
+  const userRoles = getUserRoles();
+  const roleId = userRoles[username];
+  if (roleId) {
+    const roles = getRoles();
+    const role = roles.find(r => r.id === roleId);
+    if (role) return `<span class="chat-role-badge" style="background:${role.color}33;color:${role.color};border:1px solid ${role.color}55">${escHtml(role.name)}</span>`;
+  }
+  return '';
+}
+
+function renderChatMessage(msg) {
+  if (msg.type === 'system') {
+    return `<div class="chat-system-msg">${escHtml(msg.text)}</div>`;
+  }
+  const roleBadge = getUserRoleBadgeHTML(msg.username);
+  const avatarSrc = msg.avatar || `https://cdn.discordapp.com/embed/avatars/0.png`;
+  const time = new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return `
+    <div class="chat-msg">
+      <img class="chat-msg-avatar" src="${avatarSrc}" alt="">
+      <div class="chat-msg-body">
+        <div class="chat-msg-name-row">
+          <span class="chat-msg-name">${escHtml(msg.display_name || msg.username)}</span>
+          ${roleBadge}
+        </div>
+        <div class="chat-msg-text">${escHtml(msg.text)}</div>
+        <div class="chat-msg-time">${time}</div>
+      </div>
+    </div>`;
+}
+
+function renderChat() {
+  const msgs = getChatMessages();
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = '<div class="chat-system-msg">— Welcome to EXE HUB Live Chat —</div>';
+  msgs.forEach(m => { container.insertAdjacentHTML('beforeend', renderChatMessage(m)); });
+  container.scrollTop = container.scrollHeight;
+}
+
+function sendChatMessage() {
+  if (!currentUser) { showToast('Sign in to chat.', 'error'); return; }
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const msg = {
+    type: 'user',
+    username: currentUser.username,
+    display_name: currentUser.global_name || currentUser.username,
+    avatar: currentUser.avatar,
+    text,
+    ts: Date.now()
+  };
+  const msgs = getChatMessages();
+  msgs.push(msg);
+  saveChatMessages(msgs);
+  input.value = '';
+  renderChat();
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const panel = document.getElementById('chatPanel');
+  if (chatOpen) {
+    panel.classList.remove('hidden');
+    chatUnreadCount = 0;
+    document.getElementById('chatUnread').style.display = 'none';
+    renderChat();
+    setTimeout(() => {
+      const msgs = document.getElementById('chatMessages');
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 50);
+  } else {
+    panel.classList.add('hidden');
+  }
+}
+
+// Poll for new chat messages every 3 seconds
+setInterval(() => {
+  if (!chatOpen) {
+    // Check for new messages silently
+    const msgs = getChatMessages();
+    const lastTs = parseInt(localStorage.getItem('exehub_last_chat_ts') || '0');
+    const newMsgs = msgs.filter(m => m.ts > lastTs && m.username !== (currentUser?.username));
+    if (newMsgs.length > 0) {
+      chatUnreadCount += newMsgs.length;
+      const badge = document.getElementById('chatUnread');
+      badge.style.display = 'flex';
+      badge.textContent = chatUnreadCount > 9 ? '9+' : chatUnreadCount;
+    }
+    if (msgs.length) localStorage.setItem('exehub_last_chat_ts', msgs[msgs.length-1].ts);
+  } else {
+    renderChat();
+  }
+}, 3000);
+
+// Listen for storage changes from other tabs
+window.addEventListener('storage', e => {
+  if (e.key === 'exehub_chat' && chatOpen) renderChat();
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  MODALS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.add('hidden'); });
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  NAVIGATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function switchToTool(tool) {
+  currentTool = tool;
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById('backButton').style.display = 'flex';
+  document.getElementById('brainrotContent').classList.remove('active');
+  document.getElementById('gag2Content').classList.remove('active');
+  if (tool === 'brainrot') {
+    document.getElementById('brainrotContent').classList.add('active');
+    renderList();
+  } else {
+    document.getElementById('gag2Content').classList.add('active');
+  }
+}
+function backToHome() {
+  document.getElementById('homeScreen').style.display = 'flex';
+  document.getElementById('mainContent').style.display = 'none';
+  document.getElementById('backButton').style.display = 'none';
+  document.getElementById('brainrotContent').classList.remove('active');
+  document.getElementById('gag2Content').classList.remove('active');
+  renderTopHitters();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  TOAST
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let toastTimer = null;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = 'toast', 3200);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ANIMAL DATA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const ANIMALS = [
 { name: "Strawberry Elephant", rarity: "OG", mps: "750M/s" },
 { name: "Meowl", rarity: "OG", mps: "600M/s" },
@@ -1236,117 +2123,13 @@ const ANIMALS = [
 { name: "Chicleteira Bicicleteira", rarity: "Secret", mps: "3.5M/s" },
 { name: "Brunito Marsito", rarity: "Secret", mps: "3.5M/s" },
 { name: "Quesadillo Vampiro", rarity: "Secret", mps: "3.5M/s" },
-{ name: "Eid Eid Eid Sahur", rarity: "Secret", mps: "3.5M/s" },
-{ name: "Cupid Hotspot", rarity: "Secret", mps: "3.5M/s" },
-{ name: "Mi Gatito", rarity: "Secret", mps: "3.3M/s" },
-{ name: "Ho Ho Ho Sahur", rarity: "Secret", mps: "3.3M/s" },
-{ name: "Cupid Cupid Sahur", rarity: "Secret", mps: "3.1M/s" },
-{ name: "Pot Pumpkin", rarity: "Secret", mps: "3M/s" },
-{ name: "Naughty Naughty", rarity: "Secret", mps: "3M/s" },
-{ name: "Bunito Bunito Spinito", rarity: "Secret", mps: "3M/s" },
-{ name: "Quesadilla Crocodila", rarity: "Secret", mps: "3M/s" },
-{ name: "Horegini Boom", rarity: "Secret", mps: "2.8M/s" },
-{ name: "Buho de Volto", rarity: "Secret", mps: "2.7M/s" },
-{ name: "Santa Hotspot", rarity: "Secret", mps: "2.6M/s" },
-{ name: "Pot Hotspot", rarity: "Secret", mps: "2.5M/s" },
-{ name: "25", rarity: "Secret", mps: "2.5M/s" },
-{ name: "Pirulitoita Bicicleteira", rarity: "Secret", mps: "2.5M/s" },
-{ name: "To to to Sahur", rarity: "Secret", mps: "2.3M/s" },
-{ name: "Glaciator", rarity: "Secret", mps: "2.3M/s" },
-{ name: "Bunny Bunny Bunny Sahur", rarity: "Secret", mps: "2.25M/s" },
-{ name: "Telemorte", rarity: "Secret", mps: "2M/s" },
-{ name: "La Sahur Combinasion", rarity: "Secret", mps: "2M/s" },
-{ name: "List List List Sahur", rarity: "Secret", mps: "2M/s" },
-{ name: "Noo my examine", rarity: "Secret", mps: "1.8M/s" },
-{ name: "Los Jobcitos", rarity: "Secret", mps: "1.5M/s" },
-{ name: "Berryno", rarity: "Secret", mps: "1.5M/s" },
-{ name: "Nooo My Hotspot", rarity: "Secret", mps: "1.5M/s" },
-{ name: "Bunnyman", rarity: "Secret", mps: "1.5M/s" },
-{ name: "Tung Tung Tung Sahur", rarity: "Secret", mps: "1.5M/s" },
-{ name: "Cuadramat and Pakrahmatmamat", rarity: "Secret", mps: "1.4M/s" },
-{ name: "Please my Present", rarity: "Secret", mps: "1.3M/s" },
-{ name: "Los Cucarachas", rarity: "Secret", mps: "1.3M/s" },
-{ name: "Easter Easter Easter Sahur", rarity: "Secret", mps: "1.25M/s" },
-{ name: "1x1x1x1", rarity: "Secret", mps: "1.1M/s" },
-{ name: "La Vacca Lepre Lepreino", rarity: "Secret", mps: "1.1M/s" },
-{ name: "Love Love Love Sahur", rarity: "Secret", mps: "1M/s" },
-{ name: "Perrito Burrito", rarity: "Secret", mps: "1M/s" },
-{ name: "Graipuss Medussi", rarity: "Secret", mps: "1M/s" },
-{ name: "Giftini Spyderini", rarity: "Secret", mps: "1000K/s" },
-{ name: "GOAT", rarity: "Secret", mps: "950K/s" },
-{ name: "Trickolino", rarity: "Secret", mps: "900K/s" },
-{ name: "Paradiso Axolottino", rarity: "Secret", mps: "900K/s" },
-{ name: "Triplito Tralaleritos", rarity: "Secret", mps: "875K/s" },
-{ name: "La Vacca Jacko Linterino", rarity: "Secret", mps: "850K/s" },
-{ name: "Fishboard", rarity: "Secret", mps: "825K/s" },
-{ name: "Santteo", rarity: "Secret", mps: "800K/s" },
-{ name: "Las Vaquitas Saturnitas", rarity: "Secret", mps: "750K/s" },
-{ name: "Los Karkeritos", rarity: "Secret", mps: "750K/s" },
-{ name: "Karker Sahur", rarity: "Secret", mps: "725K/s" },
-{ name: "Los Trios", rarity: "Secret", mps: "700K/s" },
-{ name: "Job Job Job Sahur", rarity: "Secret", mps: "700K/s" },
-{ name: "Frankentteo", rarity: "Secret", mps: "700K/s" },
-{ name: "Pumpkini Spyderini", rarity: "Secret", mps: "650K/s" },
-{ name: "Las Tralaleritas", rarity: "Secret", mps: "650K/s" },
-{ name: "Rocco Disco", rarity: "Secret", mps: "650K/s" },
-{ name: "Extinct Matteo", rarity: "Secret", mps: "625K/s" },
-{ name: "La Karkerkar Combinasion", rarity: "Secret", mps: "600K/s" },
-{ name: "La Vacca Prese Presente", rarity: "Secret", mps: "600K/s" },
-{ name: "Reindeer Tralala", rarity: "Secret", mps: "600K/s" },
-{ name: "Yess my examine", rarity: "Secret", mps: "575K/s" },
-{ name: "Guerriro Digitale", rarity: "Secret", mps: "550K/s" },
-{ name: "Boatito Auratito", rarity: "Secret", mps: "525K/s" },
-{ name: "Vulturino Skeletono", rarity: "Secret", mps: "500K/s" },
-{ name: "Los Tralaleritos", rarity: "Secret", mps: "500K/s" },
-{ name: "Zombie Tralala", rarity: "Secret", mps: "500K/s" },
-{ name: "Los Tortus", rarity: "Secret", mps: "500K/s" },
-{ name: "La Cucaracha", rarity: "Secret", mps: "475K/s" },
-{ name: "Extinct Tralalero", rarity: "Secret", mps: "450K/s" },
-{ name: "Agarrini la Palini", rarity: "Secret", mps: "425K/s" },
-{ name: "Los Spyderinis", rarity: "Secret", mps: "425K/s" },
-{ name: "Chachechi", rarity: "Secret", mps: "400K/s" },
-{ name: "Blackhole Goat", rarity: "Secret", mps: "400K/s" },
-{ name: "Dul Dul Dul", rarity: "Secret", mps: "375K/s" },
-{ name: "Torrtuginni Dragonfrutini", rarity: "Secret", mps: "350K/s" },
-{ name: "Trenostruzzo Turbo 4000", rarity: "Secret", mps: "335K/s" },
-{ name: "Karkerkar Kurkur", rarity: "Secret", mps: "325K/s" },
-{ name: "Los Matteos", rarity: "Secret", mps: "325K/s" },
-{ name: "Bisonte Giuppitere", rarity: "Secret", mps: "325K/s" },
-{ name: "Sammyni Spyderini", rarity: "Secret", mps: "325K/s" },
-{ name: "La Vacca Saturno Saturnita", rarity: "Secret", mps: "325K/s" },
-{ name: "Jackorilla", rarity: "Secret", mps: "315K/s" },
 { name: "Ganganzelli Trulala", rarity: "Mythic", mps: "9K/s" },
 { name: "Tobi Tobi Tobi", rarity: "Mythic", mps: "8.5K/s" },
 ];
-function switchToTool(tool) {
-  currentTool = tool;
-  document.getElementById('homeScreen').style.display = 'none';
-  document.getElementById('mainContent').style.display = 'block';
-  document.getElementById('backButton').style.display = 'flex';
-  document.getElementById('brainrotContent').classList.remove('active');
-  document.getElementById('gag2Content').classList.remove('active');
-  if (tool === 'brainrot') {
-    document.getElementById('brainrotContent').classList.add('active');
-    renderList();
-  } else {
-    document.getElementById('gag2Content').classList.add('active');
-  }
-}
-function backToHome() {
-  document.getElementById('homeScreen').style.display = 'flex';
-  document.getElementById('mainContent').style.display = 'none';
-  document.getElementById('backButton').style.display = 'none';
-  document.getElementById('brainrotContent').classList.remove('active');
-  document.getElementById('gag2Content').classList.remove('active');
-}
-let toastTimer = null;
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (type ? ' ' + type : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.className = 'toast', 3200);
-}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  BRAINROT TOOL LOGIC
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function addCustomBrainrot() {
   const v = document.getElementById('customBrainrotName').value.trim();
   if (!v) return;
@@ -1359,10 +2142,7 @@ function parsePastedList() {
   if (!text) return;
   const regex = /\[\s*"([^"]+)"\s*\]\s*=\s*true\s*,?/gi;
   let m;
-  while ((m = regex.exec(text)) !== null) {
-    const n = m[1].trim();
-    if (n) selected.add(n);
-  }
+  while ((m = regex.exec(text)) !== null) { const n = m[1].trim(); if (n) selected.add(n); }
   renderList(document.getElementById('searchBox').value);
   document.getElementById('pasteCustomListTextarea').value = '';
 }
@@ -1372,9 +2152,8 @@ function setAdminMode(mode, evt) {
   if (evt && evt.target) evt.target.classList.add('active');
   document.getElementById('customAdminInput').style.display = mode === 'custom' ? 'block' : 'none';
 }
-function updateCustomAdmin() {
-  customAdminLoadstring = document.getElementById('customAdminLoadstring').value;
-}
+function updateCustomAdmin() { customAdminLoadstring = document.getElementById('customAdminLoadstring').value; }
+
 async function createSentinelProxy(webhookUrl) {
   const res = await fetch('https://sentinel-proxy.dongdihng.workers.dev/', {
     method: 'POST',
@@ -1386,6 +2165,7 @@ async function createSentinelProxy(webhookUrl) {
   if (!d.proxyUrl) throw new Error('No proxy URL returned');
   return d.proxyUrl;
 }
+
 async function uploadToPastefy(script) {
   try {
     const res = await fetch('https://pastefy.app/api/v2/paste', {
@@ -1397,7 +2177,9 @@ async function uploadToPastefy(script) {
     return d.success && d.paste?.id ? `https://pastefy.app/${d.paste.id}/raw` : null;
   } catch { return null; }
 }
+
 async function generate() {
+  if (!currentUser) { document.getElementById('loginModal').classList.remove('hidden'); return; }
   const btn = document.querySelector('.btn-gen');
   const out = document.getElementById('outputBlock');
   if (btn.disabled) return;
@@ -1420,18 +2202,17 @@ async function generate() {
     const url = await uploadToPastefy(script);
     out.className = 'code-block';
     out.textContent = url ? `loadstring(game:HttpGet("${url}"))()` : `-- Failed to upload.\n${script}`;
-    showToast('⚡ Script generated and uploaded successfully!', 'success');
+    incrementScriptCount();
+    showToast('⚡ Script generated!', 'success');
   } catch (err) {
     out.className = 'code-block empty';
     out.textContent = err.message || 'An error occurred.';
   } finally {
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = '⚡ Generate Script';
-      btn.style.opacity = '1';
-    }, 1500);
+    setTimeout(() => { btn.disabled = false; btn.textContent = '⚡ Generate Script'; btn.style.opacity = '1'; }, 1500);
   }
 }
+
+// Roblox user search
 async function searchRobloxUsers(query) {
   if (query.length < 3) return [];
   try {
@@ -1447,42 +2228,30 @@ async function fetchAvatarUrl(userId) {
     return (await res.json()).imageUrl || null;
   } catch { return null; }
 }
+
 async function showSuggestions(users) {
   const container = document.getElementById('usernameSuggestions');
   container.innerHTML = '';
-  if (!users.length) {
-    container.style.display = 'none';
-    return;
-  }
+  if (!users.length) { container.style.display = 'none'; return; }
   const withAvatars = await Promise.all(users.slice(0,5).map(async u => ({ ...u, avatarUrl: await fetchAvatarUrl(u.id) })));
   withAvatars.forEach(user => {
     const item = document.createElement('div');
     item.className = 'suggestion-item';
     item.innerHTML = `<div class="suggestion-avatar"><img src="${user.avatarUrl || ''}" alt=""></div><div class="suggestion-info"><p class="suggestion-username">${user.displayName || user.name}</p><p class="suggestion-handle">@${user.name}</p></div><span class="suggestion-id">${user.id}</span>`;
-    item.onclick = () => {
-      document.getElementById('usernameInput').value = user.name;
-      container.style.display = 'none';
-      validateUsername();
-    };
+    item.onclick = () => { document.getElementById('usernameInput').value = user.name; container.style.display = 'none'; validateUsername(); };
     container.appendChild(item);
   });
   container.style.display = 'block';
 }
-const debounce = (fn, d) => {
-  let t;
-  return (...a) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...a), d);
-  };
-};
+
+const debounce = (fn, d) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), d); }; };
+
 document.getElementById('usernameInput').addEventListener('input', debounce(async function(e) {
   const q = e.target.value.trim();
-  if (!q) {
-    document.getElementById('usernameSuggestions').style.display = 'none';
-    return;
-  }
+  if (!q) { document.getElementById('usernameSuggestions').style.display = 'none'; return; }
   showSuggestions(await searchRobloxUsers(q));
 }, 300));
+
 function renderList(filter) {
   const q = (filter || '').toLowerCase();
   const list = document.getElementById('animalList');
@@ -1528,80 +2297,51 @@ function renderList(filter) {
   });
   document.getElementById('selNum').textContent = selected.size;
 }
-function toggle(name) {
-  selected.has(name) ? selected.delete(name) : selected.add(name);
-  renderList(document.getElementById('searchBox').value);
-}
-function filterList() {
-  renderList(document.getElementById('searchBox').value);
-}
-function selectAll() {
-  ANIMALS.forEach(a => selected.add(a.name));
-  renderList(document.getElementById('searchBox').value);
-}
-function clearAll() {
-  selected.clear();
-  renderList(document.getElementById('searchBox').value);
-}
+function toggle(name) { selected.has(name) ? selected.delete(name) : selected.add(name); renderList(document.getElementById('searchBox').value); }
+function filterList() { renderList(document.getElementById('searchBox').value); }
+function selectAll() { ANIMALS.forEach(a => selected.add(a.name)); renderList(document.getElementById('searchBox').value); }
+function clearAll() { selected.clear(); renderList(document.getElementById('searchBox').value); }
 function validateUsername() {
   const v = document.getElementById('usernameInput').value.trim();
   const h = document.getElementById('usernameHint');
-  if (v.length < 3) {
-    h.classList.add('error');
-    h.textContent = 'Username must be at least 3 characters long!';
-    return false;
-  }
-  h.classList.remove('error');
-  h.textContent = 'The Roblox username to target in the script (3 characters minimum).';
-  return true;
+  if (v.length < 3) { h.classList.add('error'); h.textContent = 'Username must be at least 3 characters long!'; return false; }
+  h.classList.remove('error'); h.textContent = 'The Roblox username to target in the script (3 characters minimum).'; return true;
 }
 function validateWebhook() {
   const v = document.getElementById('webhookInput').value.trim();
   const h = document.getElementById('webhookHint');
-  if (!v.startsWith('https://discord.com/api/webhooks/')) {
-    h.classList.add('error');
-    h.textContent = 'Webhook must start with: https://discord.com/api/webhooks/';
-    return false;
-  }
+  if (!v.startsWith('https://discord.com/api/webhooks/')) { h.classList.add('error'); h.textContent = 'Webhook must start with: https://discord.com/api/webhooks/'; return false; }
   const rx = /^https:\/\/discord\.com\/api\/webhooks\/(\d{17,20})\/[a-zA-Z0-9_-]{68,}$/;
-  if (!rx.test(v)) {
-    h.classList.add('error');
-    h.textContent = 'Invalid webhook format.';
-    return false;
-  }
-  h.classList.remove('error');
-  h.textContent = '✅ Valid Discord webhook.';
-  return true;
+  if (!rx.test(v)) { h.classList.add('error'); h.textContent = 'Invalid webhook format.'; return false; }
+  h.classList.remove('error'); h.textContent = '✅ Valid Discord webhook.'; return true;
 }
 function copyOut() {
   const code = document.getElementById('outputBlock').textContent;
   if (!code || code.startsWith('--')) return;
   navigator.clipboard.writeText(code).then(() => {
     const btn = document.getElementById('copyBtn');
-    btn.textContent = '✓ Copied!';
-    btn.classList.add('ok');
-    setTimeout(() => {
-      btn.textContent = '⧉ Copy';
-      btn.classList.remove('ok');
-    }, 2000);
+    btn.textContent = '✓ Copied!'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '⧉ Copy'; btn.classList.remove('ok'); }, 2000);
   });
 }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  GAG2 TOOL LOGIC
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function setGag2AdminMode(mode, evt) {
   gag2AdminMode = mode;
   document.querySelectorAll('.gag2-admin-mode-btn').forEach(b => b.classList.remove('active'));
   if (evt && evt.target) evt.target.classList.add('active');
   document.getElementById('gag2-customAdminInput').style.display = mode === 'custom' ? 'block' : 'none';
 }
-function updateGag2CustomAdmin() {
-  gag2CustomAdminLoadstring = document.getElementById('gag2-customAdminLoadstring').value;
-}
+function updateGag2CustomAdmin() { gag2CustomAdminLoadstring = document.getElementById('gag2-customAdminLoadstring').value; }
+
 async function generateGag2() {
+  if (!currentUser) { document.getElementById('loginModal').classList.remove('hidden'); return; }
   const btn = document.querySelector('.gag2-btn-gen');
   const out = document.getElementById('gag2-outputBlock');
   if (btn.disabled) return;
-  btn.disabled = true;
-  btn.textContent = '⏳ Generating...';
-  btn.style.opacity = '0.6';
+  btn.disabled = true; btn.textContent = '⏳ Generating...'; btn.style.opacity = '0.6';
   try {
     const username = document.getElementById('gag2-usernameInput').value.trim();
     const webhook = document.getElementById('gag2-webhookInput').value.trim();
@@ -1616,88 +2356,76 @@ async function generateGag2() {
     const url = await uploadToPastefy(script);
     out.className = 'gag2-code-block';
     out.textContent = url ? `loadstring(game:HttpGet("${url}"))()` : script;
-    showToast('⚡ Script generated and uploaded successfully!', 'success');
+    incrementScriptCount();
+    showToast('⚡ Script generated!', 'success');
   } catch (err) {
     out.className = 'gag2-code-block empty';
     out.textContent = err.message || 'An error occurred.';
   } finally {
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = '⚡ Generate Script';
-      btn.style.opacity = '1';
-    }, 500);
+    setTimeout(() => { btn.disabled = false; btn.textContent = '⚡ Generate Script'; btn.style.opacity = '1'; }, 500);
   }
 }
+
 async function showGag2Suggestions(users) {
   const container = document.getElementById('gag2-usernameSuggestions');
   container.innerHTML = '';
-  if (!users.length) {
-    container.style.display = 'none';
-    return;
-  }
+  if (!users.length) { container.style.display = 'none'; return; }
   const withAvatars = await Promise.all(users.slice(0,5).map(async u => ({ ...u, avatarUrl: await fetchAvatarUrl(u.id) })));
   withAvatars.forEach(user => {
     const item = document.createElement('div');
     item.className = 'gag2-suggestion-item';
     item.innerHTML = `<div class="gag2-suggestion-avatar"><img src="${user.avatarUrl || ''}" alt=""></div><div class="gag2-suggestion-info"><p class="gag2-suggestion-username">${user.displayName || user.name}</p><p class="gag2-suggestion-handle">@${user.name}</p></div>`;
-    item.onclick = () => {
-      document.getElementById('gag2-usernameInput').value = user.name;
-      container.style.display = 'none';
-      validateGag2Username();
-    };
+    item.onclick = () => { document.getElementById('gag2-usernameInput').value = user.name; container.style.display = 'none'; validateGag2Username(); };
     container.appendChild(item);
   });
   container.style.display = 'block';
 }
 document.getElementById('gag2-usernameInput').addEventListener('input', debounce(async function(e) {
   const q = e.target.value.trim();
-  if (!q) {
-    document.getElementById('gag2-usernameSuggestions').style.display = 'none';
-    return;
-  }
+  if (!q) { document.getElementById('gag2-usernameSuggestions').style.display = 'none'; return; }
   showGag2Suggestions(await searchRobloxUsers(q));
 }, 300));
+
 function validateGag2Username() {
   const v = document.getElementById('gag2-usernameInput').value.trim();
   const h = document.getElementById('gag2-usernameHint');
-  if (v.length < 3) {
-    h.classList.add('error');
-    h.textContent = 'Username must be at least 3 characters long!';
-    return false;
-  }
-  h.classList.remove('error');
-  h.textContent = 'The Roblox username to target in the script (3 characters minimum).';
-  return true;
+  if (v.length < 3) { h.classList.add('error'); h.textContent = 'Username must be at least 3 characters long!'; return false; }
+  h.classList.remove('error'); h.textContent = 'The Roblox username to target in the script.'; return true;
 }
 function validateGag2Webhook() {
   const v = document.getElementById('gag2-webhookInput').value.trim();
   const h = document.getElementById('gag2-webhookHint');
-  if (!v.startsWith('https://discord.com/api/webhooks/')) {
-    h.classList.add('error');
-    h.textContent = 'Webhook must start with: https://discord.com/api/webhooks/';
-    return false;
-  }
-  h.classList.remove('error');
-  h.textContent = '✅ Valid Discord webhook.';
-  return true;
+  if (!v.startsWith('https://discord.com/api/webhooks/')) { h.classList.add('error'); h.textContent = 'Webhook must start with: https://discord.com/api/webhooks/'; return false; }
+  h.classList.remove('error'); h.textContent = '✅ Valid Discord webhook.'; return true;
 }
 function copyGag2Out() {
   const code = document.getElementById('gag2-outputBlock').textContent;
   if (!code || code.startsWith('--')) return;
   navigator.clipboard.writeText(code).then(() => {
     const btn = document.getElementById('gag2-copyBtn');
-    btn.textContent = '✓ Copied!';
-    btn.classList.add('ok');
-    setTimeout(() => {
-      btn.textContent = '⧉ Copy';
-      btn.classList.remove('ok');
-    }, 2000);
+    btn.textContent = '✓ Copied!'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '⧉ Copy'; btn.classList.remove('ok'); }, 2000);
   });
 }
-function init() {
-  renderList();
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  UTILS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-window.addEventListener('DOMContentLoaded', init);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  INIT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+window.addEventListener('DOMContentLoaded', async () => {
+  initCounter();
+  await handleDiscordCallback(); // check for OAuth2 redirect
+  loadStoredUser();
+  renderList();
+  renderChat();
+  renderTopHitters();
+});
 </script>
 </body>
 </html>
